@@ -1626,7 +1626,7 @@ int polling_config_init()
 		return RDKC_FAILURE;
 	}
 
-	is_json_config_enabled = IsJSONEnabledInRFC( (char*)RFC_FILE, (char*)RFC_JSON_FLAG );
+	is_json_config_enabled = IsJSONEnabledInRFC( (char*)RFCFILE, (char*)RFC_JSON_FLAG );
 
 	polling_inited = TRUE;
 	//printf("\nPolling Inited\n");
