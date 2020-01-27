@@ -27,9 +27,6 @@
 
 static pthread_mutex_t polling_config_mutex;
 static int polling_inited = FALSE;
-
-static int is_json_config_enabled = RDKC_FAILURE;
-
 int readValues(FILE *pFile, char *pToken, char *data);
 int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile);
 
@@ -467,20 +464,10 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 	fputs((const char *) buffer, writeFile);
 
 #if defined (SOC_JSON_CONFIG_ENABLE)
-#ifdef XCAM2
-        if(systemConfigWrite(XH_TAG_NAME_CVR, (void*)crf, abrBitrateChanged)!=RDKC_SUCCESS) // Write the config params to system.conf
-        {
+	if(systemConfigWrite(XH_TAG_NAME_CVR, (void*)crf, abrBitrateChanged)!=RDKC_SUCCESS) // Write the config params to system.conf
+	{
                 perror("Polling systemConfigWrite write cvr config to system.conf failed");
-        }
-#else
-	if( is_json_config_enabled == RDKC_SUCCESS )
-        {
-		if(systemConfigWrite(XH_TAG_NAME_CVR, (void*)crf, abrBitrateChanged)!=RDKC_SUCCESS) // Write the config params to system.conf
-		{
-			perror("Polling systemConfigWrite write cvr config to system.conf failed");
-		}
 	}
-#endif
 #else
 	perror("\nSOC_JSON_CONFIG is not enabled in configMgr source code\n");
 #endif
@@ -1541,53 +1528,6 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 	return RDKC_SUCCESS;
 }
 
-/** @description: Reading the json flag via RFC.
- *  @param[in] file: file name
- *  @param[in] name: Name of the json flag
- *  @return: int
- */
-int IsJSONEnabledInRFC( char *file, char *name )
-{
-        if ( ( NULL == file ) || ( NULL ==  name ) )
-        {
-                perror("Json polling : Either file or name is NULL\n");
-                return RDKC_FAILURE;
-        }
-        if(RDKC_SUCCESS != RFCConfigInit())
-        {
-                perror("Json polling : RFCConfigInit Failed\n");
-                return RDKC_FAILURE;
-        }
-        char value[MAX_SIZE] = { 0 };
-	if ( RDKC_SUCCESS == IsRFCFileAvailable( file ) )
-        {
-                if ( RDKC_SUCCESS == GetValueFromRFCFile( file, name, value ) )
-                {
-                        //perror("Json polling : Able to get value from file\n");
-                        if ( strcmp( value, RDKC_TRUE ) == 0 )
-                        {
-                                //perror("Json polling : RFC is set inside the file\n");
-                                return RDKC_SUCCESS;
-                        }
-                        else
-                        {
-                                //perror("Json polling : RFC is not set inside the file\n");
-                                return RDKC_FAILURE;
-                        }
-                }
-                else
-                {
-                        //perror("Json polling : Unable to get value from the file\n");
-                        return RDKC_FAILURE;
-                }
-        }
-        else
-        {
-                perror("Json polling : RFC file is not available\n");
-                return RDKC_FAILURE;
-        }
-}
-
 /**
  * @brief Read the user credentials
  * @param name is the usr_creds_info_t.
@@ -1751,8 +1691,6 @@ int polling_config_init()
 		printf("%s [%d] Error Initializing Mutex!!!\n", __FILE__, __LINE__);
 		return RDKC_FAILURE;
 	}
-
-	is_json_config_enabled = IsJSONEnabledInRFC( (char*)RFCFILE, (char*)RFC_JSON_FLAG );
 
 	polling_inited = TRUE;
 	//printf("\nPolling Inited\n");
