@@ -1535,6 +1535,8 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
        SendSignal2AppsBySpecFile("hydra", SIGUSR1, "/tmp/hydra.lock");
        SendSignal2AppsBySpecFile("xw3_monitor", SIGUSR1, "/tmp/xw3_monitor.lock");
 #endif
+
+#if 0
         //Set Security credentials to /opt/usr_config/sys.conf
         writeFile = fopen(SECURITY_CONFIG_FILE, "w");
         if(writeFile == NULL)
@@ -1569,6 +1571,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
                 return RDKC_FAILURE;
         }
         fclose(writeFile);
+#endif
         if(Rcrf)
                 free(Rcrf);
         return RDKC_SUCCESS;
