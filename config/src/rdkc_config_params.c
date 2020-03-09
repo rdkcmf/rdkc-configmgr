@@ -140,12 +140,15 @@ static int set_usr_config(const char* name,const char* value)
 {
     char fullpath[MAX_BUFFER_SIZE] = {'\0'};
     FILE* fpUsr = NULL;
-
+    int path_len = 0;
+    char newpath[MAX_BUFFER_SIZE] = {'\0'};
     /*generating the fullpath of user config file*/
     strcpy(fullpath,g_usrConfigLoc);
     strcat(fullpath,name);
-    strcat(fullpath,".txt");
-
+    strcat(fullpath,".txt.new");
+    path_len = strlen(fullpath) - 4;
+    strncpy(newpath,fullpath,path_len);
+    newpath[path_len] = '\0';
     if((fpUsr=fopen(fullpath,"w"))==NULL) {
         //printf("ERROR!  Could not open configuration file!\n");
         //printf("Tried %s\n", fullpath);
@@ -159,7 +162,7 @@ static int set_usr_config(const char* name,const char* value)
 	printf("set_usr_config : Error while closing files\n");
 	return RDKC_FAILURE;
     }
-
+    rename(fullpath,newpath);
     return RDKC_SUCCESS;
 }
 

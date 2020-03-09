@@ -257,7 +257,7 @@ int writePollingConfig(_config_t *crf)
 		}
 	}
 
-	writeFile = fopen(POLLING_CONFIG_FILE, "w");
+	writeFile = fopen(POLLING_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -293,7 +293,10 @@ int writePollingConfig(_config_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(POLLING_CONFIG_FILE".new",POLLING_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -377,7 +380,7 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(CLOUDRECORDER_CONFIG_FILE, "w");
+	writeFile = fopen(CLOUDRECORDER_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -447,6 +450,7 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_RESOLUTION, crf->cvr_segment_info.cvr_stream_info.resolution);
 	fputs((const char *) buffer, writeFile);
 
+
 	sprintf(buffer, "%s=%s\n", XH_ATTR_FPS, crf->cvr_segment_info.cvr_stream_info.fps);
 	fputs((const char *) buffer, writeFile);
 
@@ -482,7 +486,10 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(CLOUDRECORDER_CONFIG_FILE".new",CLOUDRECORDER_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -560,7 +567,7 @@ int writeEventConfig(events_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(EVENTS_CONFIG_FILE, "w");
+	writeFile = fopen(EVENTS_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -605,7 +612,10 @@ int writeEventConfig(events_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(EVENTS_CONFIG_FILE".new",EVENTS_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -681,7 +691,7 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(DETECTION_CONFIG_FILE, "w");
+	writeFile = fopen(DETECTION_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -718,7 +728,10 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(DETECTION_CONFIG_FILE".new",DETECTION_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -796,7 +809,7 @@ int writeEMSConfig(ems_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(EMS_CONFIG_FILE, "w");
+	writeFile = fopen(EMS_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -842,7 +855,10 @@ int writeEMSConfig(ems_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(EMS_CONFIG_FILE".new",EMS_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -917,7 +933,7 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(LIVECACHE_CONFIG_FILE, "w");
+	writeFile = fopen(LIVECACHE_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -953,7 +969,10 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(LIVECACHE_CONFIG_FILE".new",LIVECACHE_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -1031,7 +1050,7 @@ int writeTNConfig(tn_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(TN_CONFIG_FILE, "w");
+	writeFile = fopen(TN_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -1076,7 +1095,10 @@ int writeTNConfig(tn_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(TN_CONFIG_FILE".new",TN_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -1183,7 +1205,7 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(KVS_CONFIG_FILE, "w");
+	writeFile = fopen(KVS_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
                 if(Rcrf) {
@@ -1274,7 +1296,10 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 		free(Rcrf);
 		Rcrf = NULL;
 	}
+        fflush(writeFile);
+        fsync(fileno(writeFile));
 	fclose(writeFile);
+        rename(KVS_CONFIG_FILE".new",KVS_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -1327,6 +1352,7 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 	FILE *writeFile;
 	char buffer[DATA_LEN];
 	int retVal = RDKC_FAILURE;
+        int file_fd;
 	lux_threshold_info_t *Rcrf;
 
 	if(crf == NULL)
@@ -1348,7 +1374,7 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 		}
 	}
 
-	writeFile = fopen(LUX_CONFIG_FILE, "w");
+	writeFile = fopen(LUX_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
 		if(Rcrf)
@@ -1381,7 +1407,11 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
+        file_fd=fileno(writeFile);
+        fflush(writeFile);
+        fsync(file_fd);
 	fclose(writeFile);
+        rename(LUX_CONFIG_FILE".new",LUX_CONFIG_FILE);
 	return RDKC_SUCCESS;
 }
 
@@ -1537,8 +1567,9 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
 #endif
 
 #if 0
+        int file_fd;
         //Set Security credentials to /opt/usr_config/sys.conf
-        writeFile = fopen(SECURITY_CONFIG_FILE, "w");
+        writeFile = fopen(SECURITY_CONFIG_FILE".new", "w");
         if(writeFile == NULL)
         {
                 if(Rcrf)
@@ -1570,10 +1601,14 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
                         free(Rcrf);
                 return RDKC_FAILURE;
         }
+        file_fd = fileno(writeFile);
+        fflush(writeFile);
+        fsync(file_fd);
         fclose(writeFile);
+        rename(SECURITY_CONFIG_FILE".new",SECURITY_CONFIG_FILE);
 #endif
         if(Rcrf)
-                free(Rcrf);
+             free(Rcrf);
         return RDKC_SUCCESS;
 }
 
