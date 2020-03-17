@@ -47,6 +47,7 @@ extern "C"
 #define EMS_CONFIG_FILE "/opt/usr_config/live_video.conf"
 #define LIVECACHE_CONFIG_FILE "/opt/usr_config/livecache.conf"
 #define TN_CONFIG_FILE "/opt/usr_config/tn_upload.conf"
+#define CVRSTATS_CONFIG_FILE "/opt/usr_config/cvrstats.conf"
 #define KVS_CONFIG_FILE "/opt/usr_config/kvs.conf"
 #define LUX_CONFIG_FILE "/opt/usr_config/lux.conf"
 #define SECURITY_CONFIG_FILE "/opt/usr_config/sys.conf"
@@ -100,6 +101,7 @@ extern "C"
 #define XH_ATTR_ID			   "ID"
 #define XH_ATTR_FORCE_USE_CA		   "forceUseCA"
 #define XH_ATTR_INTERVAL                   "interval"
+#define XH_FAILURE_PRECENT                   "failure-percent"
 #define XH_ATTR_URL                        "url"
 #define XH_ATTR_ROOMID                     "roomid"
 #define XH_ATTR_ERSPORT                    "ersport"
@@ -175,6 +177,13 @@ typedef struct {
     char auth_token[AUTH_TOKEN_MAX];
 } tn_provision_info_t;
 
+typedef struct {
+    char interval[CONFIG_ATTR_MAX];
+    char enabled[CONFIG_ATTR_MAX];
+    char failurePercent[CONFIG_ATTR_MAX];
+    char url[CONFIG_STRING_MAX];
+    char auth_token[AUTH_TOKEN_MAX];
+} cvrStats_provision_info_t;
 
 typedef struct {
     char enable[CONFIG_ATTR_MAX];
@@ -363,6 +372,20 @@ int readKVSConfig(kvs_provision_info_t *crf);
  * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
  */
 int writeKVSConfig(kvs_provision_info_t *crf);
+
+/**
+ * @brief Get the cvrStats provision info.
+ * @param name is cvrStats_provision_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int readCVRStatsConfig(cvrStats_provision_info_t *crf);
+
+/**
+ * @brief Store the cvrStats provision info.
+ * @param name is the cvrStats_provision_info_t.
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+int writeCVRStatsConfig(cvrStats_provision_info_t *crf);
 
 /**
  * @brief Read the LUX threshold 
