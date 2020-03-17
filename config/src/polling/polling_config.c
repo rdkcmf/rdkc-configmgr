@@ -113,6 +113,15 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->quality, Rcrf->quality)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
 	}
+	else if(!strcmp(CVRSTATS_CONFIG_FILE, configFile))
+	{
+		cvrStats_provision_info_t *Wcrf = (cvrStats_provision_info_t *)WcrfIn;
+		cvrStats_provision_info_t *Rcrf = (cvrStats_provision_info_t *)RcrfIn;
+		if(strcmp(Wcrf->interval, Rcrf->interval)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->enabled, Rcrf->enabled)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->failurePercent, Rcrf->failurePercent)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+	}
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
 		kvs_provision_info_t *Wcrf = (kvs_provision_info_t*)WcrfIn;
@@ -1103,10 +1112,127 @@ int writeTNConfig(tn_provision_info_t *crf)
 }
 
 /**
- * @brief Get the KVS provisioin info.
- * @param name is kvs_provision_info_t.
+ * @brief Get the cvrStats provision info.
+ * @param name is cvrStats_provision_info_t.
  * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
  */
+int readCVRStatsConfig(cvrStats_provision_info_t *crf)
+{
+    FILE *readFile;
+    int retVal = RDKC_FAILURE;
+
+    if(crf == NULL)
+    {
+        return RDKC_FAILURE;
+    }
+    readFile = fopen(CVRSTATS_CONFIG_FILE, "r");
+    if(readFile == NULL)
+    {
+        return RDKC_FAILURE;
+    }
+    if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
+    {
+        perror("Error while accquiring mutex!!\n ");
+        fclose(readFile);
+        return RDKC_ERR_CONF_WRITE_INPROGRESS;
+    }
+
+    retVal = readValues(readFile, XH_ATTR_INTERVAL, crf->interval);
+    retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enabled);
+    retVal = readValues(readFile, XH_FAILURE_PRECENT, crf->failurePercent);
+    retVal = readValues(readFile, XH_ATTR_URL, crf->url);
+    retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+
+    if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
+    {
+        perror("Error While Releasing Mutex!!\n ");
+        fclose(readFile);
+        return RDKC_FAILURE;
+    }
+    fclose(readFile);
+    return retVal;
+}
+
+/**
+ * @brief Store the cvrStats provision info.
+ * @param name is the cvrStats_provision_info_t.
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
+{
+    FILE *writeFile;
+    char buffer[DATA_LEN];
+    int retVal = RDKC_FAILURE;
+    cvrStats_provision_info_t *Rcrf;
+
+    if(crf == NULL)
+    {
+        return RDKC_FAILURE;
+    }
+
+    Rcrf = (cvrStats_provision_info_t*)malloc (sizeof(cvrStats_provision_info_t));
+    retVal = readCVRStatsConfig(Rcrf);
+    if(retVal == RDKC_SUCCESS)
+    {
+        /* Check if data to be set is already set, if yes, return error */
+        retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)CVRSTATS_CONFIG_FILE);
+        if(retVal == RDKC_FAILURE)
+        {
+            if(Rcrf)
+                free(Rcrf);
+            return RDKC_ERR_DATA_ALREADY_SET;
+        }
+    }
+
+    writeFile = fopen(CVRSTATS_CONFIG_FILE".new", "w");
+    if(writeFile == NULL)
+    {
+        if(Rcrf)
+            free(Rcrf);
+        return RDKC_FAILURE;
+    }
+    if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
+    {
+        perror("Error while accquiring mutex!!\n ");
+        if(writeFile)
+            fclose(writeFile);
+        if(Rcrf)
+            free(Rcrf);
+        return RDKC_ERR_CONF_READ_INPROGRESS;
+    }
+
+    sprintf(buffer, "%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
+    fputs((const char *) buffer, writeFile);
+
+    sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enabled);
+    fputs((const char *) buffer, writeFile);
+
+    sprintf(buffer, "%s=%s\n", XH_FAILURE_PRECENT, crf->failurePercent);
+    fputs((const char *) buffer, writeFile);
+
+    sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+    fputs((const char *) buffer, writeFile);
+
+    sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+    fputs((const char *) buffer, writeFile);
+
+    if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
+    {
+        perror("Error While Releasing Mutex!!\n ");
+        if(writeFile)
+            fclose(writeFile);
+        if(Rcrf)
+            free(Rcrf);
+        return RDKC_FAILURE;
+    }
+    free(Rcrf);
+    fflush(writeFile);
+    fsync(fileno(writeFile));
+    fclose(writeFile);
+    rename(CVRSTATS_CONFIG_FILE".new", CVRSTATS_CONFIG_FILE);
+    return RDKC_SUCCESS;
+}
+
 int readKVSConfig(kvs_provision_info_t *crf)
 {
 	FILE *readFile;
