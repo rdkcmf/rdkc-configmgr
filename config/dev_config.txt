@@ -1,0 +1,198 @@
+VIN Mirror Pattern = 255
+VIN Bayer Pattern  = 255
+
+VIN Video Mode = 0x00020009
+VIN Header Mode = 0
+VIN Bits = 0
+
+VIN Eshutter Time = 60
+VIN AGC DB = 6
+VIN FPS = 0
+
+Yuv Format = 1
+
+##                       0th Buffer  1st buffer 2nd Buffer 3rd Buffer
+Source Buffer Size     = 1280X720,   640X480,   640X480,   640X480
+
+##                       0th Buffer  1st buffer 2nd Buffer 3rd Buffer
+Source Buffer Max Size = 1280X720,   640X480,   640X480,   640X480
+
+                         /*Encode Type*/       /*Resolution*/ /*Source buffer Id*/
+Stream 0 Configuration = 0X1, 1280X720,       0
+
+Stream 1 Configuration = 0x1, 640X480,       1
+
+Stream 2 Configuration = 0x1, 640X480,       2
+
+Stream 3 Configuration = 0x1, 640X480,       3
+
+##                            M, N,  idr_interval, gop_structure, profile, chroma_format, enc_improve, au_type
+Stream 0 H264 Configuration = 1, 30, 1,            0,             0,       0,             0,           0
+
+Stream 1 H264 Configuration = 1, 30, 1,            0,             0,       0,             0,           0
+
+Stream 2 H264 Configuration = 1, 30, 1,            0,             0,       0,             0,           0
+
+Stream 3 H264 Configuration = 1, 30, 1,            0,             0,       0,             0,           0
+
+## GENERIC
+user_config_path = /opt/usr_config/
+
+
+## WEBRTCaa
+default_min_bitrate = 300
+default_max_bitrate = 768
+default_max_framerate = 15
+GOP_Length = 15
+
+## BGS_ALG VIDEO-ANALYTICS
+## VA_algorithm will choose the video-analytics  algorithm to be processed from below list.
+## ( <algorithm_type> : 1 (=MixtureOfGaussianV2BGS) or 2 (=FrameDifferenceBGS) or 3(=PixelBasedAdaptiveSegmenter) or 4(=DPWrenGABGS) or 5(=LBAdaptiveSOM) or 6(=IV Engine))
+## (Don't use algorithm 3 and 5 as development for this is under progress)
+## VA_algorithm = <algorithm_type>
+## Default algorithm is MixtureOfGaussianV2BGS
+VA_algorithm = 1 
+
+## Frame type
+## ( <frame_type> : 1 (=yuv) or 2(=me1) )
+## Frame_Type = <frame_type>
+## Default frame type is me1.
+Frame_Type = 1
+
+# cvr config server sets/resets 'md_mode' flag to enable/disable the motion algorithm in video analytics engine
+md_mode = 1
+
+## TEST-HARNESS COMMON
+Test_Harness_on_File_Enabled = false
+
+## TEST-HARNESS PHASE I
+Upload_URL = http://<server_ip>:8080/TestHarness/VideoUpload
+Download_URL = http://<server_ip>:8080/TestHarness/tmpVideos.dir/
+Filename_URL = http://<server_ip>:8080/TestHarness/SendAvailableFile
+Merge_URL = http://<server_ip>:8080/TestHarness/MergeVideo
+Upload_File_Fieldname = fileName
+
+## TEST-HARNESS PHASE II
+Reset_Alg_on_First_Frame = false
+nw_interface = eth0
+hostname = <server_ip>
+port = <port>
+
+## IV
+od_sensitivity = 85
+
+## OVERLAY
+
+## stream_id              = (0~3)   :: Stream for which overlay is to be applied (Should not be modified)
+## area_id                = (0~3)   :: area index for which overlay is to be applied (Should not be modified)
+## overlay_x_ord          > 0       :: x ordinate for overlay
+## overlay_y_ord          > 0       :: y ordinate for overlay
+## overlay_transparency   = (0~255) :: 0 is transparent while 255 is non-transparent
+## overlay_image_path               :: image for overlay 
+ 
+stream_id = 0
+area_id = 1
+overlay_x_ord_720p = 1160
+overlay_y_ord_720p = 40
+
+overlay_x_ord_1080p = 1800
+overlay_y_ord_1080p = 40
+
+overlay_transparency = 150
+overlay_image_path = /etc/xfinity_logo.bmp
+
+##CVR_UPLOAD_RETRY
+cvr_upload_max_retry_interval=20
+cvr_upload_min_retry_interval=1
+cvr_upload_exp_retry_factor=2
+
+##XPC_RETRY
+xpc_max_retry_interval=300
+xpc_min_retry_interval=1
+xpc_exp_retry_factor=2
+
+## NTP_SERVER
+ntp_server1 = pulsar.icontrol.com
+ntp_server2 = ntp.ccp.xcal.tv
+ntp_server3 = utcnist.colorado.edu
+ntp_best_server_index = 0
+##wait time in secs
+ntp_sync_wait_time = 43200
+
+##CLOUD_RECORDER_INFO
+polling_url=https://config-cvr.g.xfinityhome.com/config
+polling_auth=
+polling_interval=43200
+enable=0
+video_duration=15
+video_format=0
+video_address=https://config-cvr.g.xfinityhome.com/config
+video_auth=
+video_username=
+video_password=
+timeout = 20
+
+##CVR-UPLOAD
+dns_cache_timeout=60
+
+##Thumbnail_Upload
+thumbnail_upload_enable=true
+thumbnail_upload_url=https://livecache-cvr.gslb2.xfinity.com/camera
+thumbnail_upload_auth_token=
+thumbnail_upload_passive_interval=600
+thumbnail_upload_active_interval=30
+thumbnail_active_upload_duration=0
+thumbnail_buf_id=0
+
+##Audio Anaylatics
+aa_threshold_smoke_alarm=13
+aa_threshold_baby_cry=12
+aa_threshold_dog_bark=13
+aa_threshold_glass_break=12
+
+##MOTION DETECTION SENSITIVITY
+
+##IV_Day_Mode_Sensitivity   = (0.0 ~ 10.0]
+##IV_Night_Mode_Sensitivity = (0.0 ~ 10.0]
+##XCV_Day_Mode_Sensitivity  = (0.0 ~ 2.0]
+##XCV_Night_Mode_Sensitivity	= (0.0 ~ 2.0]
+
+##IV_Day_Mode_Sensitivity = 8
+##IV_Night_Mode_Sensitivity = 8
+XCV_Day_Mode_Sensitivity = 1
+XCV_Night_Mode_Sensitivity = 1
+
+##4th buffer resolution
+##IV_frame_resolution = 640x360
+XCV_frame_resolution = 352x240
+
+#LIVE_VIDEO_STREAM_INFO
+
+##Max_Live_Video_Stream_Supported       = (>=1): Maximum number of live stream supported
+##Encoded_Stream_*_Enabled              = (0/1): Determines if the encoded stream can be used for live video streaming
+##Live_Video_Stream_*                   = (0~4): Determines live stream mapping to encoded stream
+
+Max_Live_Video_Stream_Supported = 1
+
+Encoded_Stream_0_Enabled = 1
+Encoded_Stream_1_Enabled = 0
+Encoded_Stream_2_Enabled = 0
+Encoded_Stream_3_Enabled = 0
+
+Live_Video_Stream_1 = 0
+
+#LIVE_VIDEO_STREAM_INFO
+enable_audio_on_LS = 0
+
+#CVR_AUDIO
+cvr_audio_status = false
+
+#PARTNER ID
+partnerid = unknown
+
+#to suppress the motion event for below duration(in seconds)
+event_quiet_time=30
+
+#SMART_THUMBNAIL
+smart_thumbnail_upload_URL=<smart_thumbnail_upload_url>
+smart_thumbnail_auth_code=<smart_thumbnail_auth_code>
