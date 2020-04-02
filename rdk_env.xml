@@ -21,7 +21,7 @@
 <environment>
   <components>
     <configMgr>
-     <dependencies>sdk,utility</dependencies>
+     <dependencies>sdk,utility,libsyswrapper</dependencies>
 
      <is_coverity_supported>True</is_coverity_supported>
 
