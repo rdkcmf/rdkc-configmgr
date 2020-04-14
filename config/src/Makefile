@@ -38,7 +38,9 @@ LDFLAGS += -shared -lpthread
 ifeq ($(XCAM_MODEL), SCHC2)
 CFLAGS  += -DXCAM2
 endif
-
+ifeq ($(XCAM_MODEL), XHB1)
+CFLAGS  += -DOSI
+endif
 RM = rm -f
 TARGET_LIB = libconfigmanager.so
 SRCS = rdkc_mutex_handle.c $(CONFIG_MNGR_ROOT_DIR)/config/configMgrSection/rdkc_config_sections.c rdkc_config_params.c polling/polling_config.c
