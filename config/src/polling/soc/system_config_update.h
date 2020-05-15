@@ -38,7 +38,6 @@
 cvr_provision_info_t *cvrConfig;
 
 int systemConfigWrite(char* tag, void* config, bool abrBitrateChanged);
-int systemConfigRead(char* tag, void* config);
 int abrSystemConfigWrite(AbrTargetBitrate *abr_bitrate);
 
 #endif

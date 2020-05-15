@@ -28,11 +28,11 @@ int sendsignaltoprocess(const char* processname,int signalname)
 {
 	pid_t pid = -1;
 	FILE *inFp = NULL;
-	char command[32];
+	//char command[32];
 	//sprintf(command, "pidof %s", processname);
 	//if (!(inFp = popen(command, "r"))) {
-          if (!(inFp = v_secure_popen("r","pidof %s", processname))) {
-		printf("\n Unable to locate process %s\n",processname);
+        if (!(inFp = v_secure_popen("r","pidof %s", processname))) {
+		printf("\n v_secure_popen : Unable to locate process %s\n",processname);
 		return -1;
 	}
 
@@ -41,7 +41,7 @@ int sendsignaltoprocess(const char* processname,int signalname)
 	if (pid > 0) {
 		kill(pid, signalname);
 	} else {
-		printf("\n Unable to locate process %s\n",processname);
+		printf("\n sendsignaltoprocess : Unable to locate process %s\n",processname);
 		return -1;
 	}
 	return 0;
@@ -55,112 +55,60 @@ int sendsignaltoprocess(const char* processname,int signalname)
 int systemConfigWrite(char* tag, void* config, bool abrBitrateChanged)
 {
 	int retVal = RDKC_SUCCESS;
-	char set_param_val[MAXSIZE] = {0};
+	cvrConfig = (cvr_provision_info_t*) config;
 
-        if((tag == NULL) || (config == NULL))
-        {
-                perror("systemConfigWrite Invalid Params \n");
-                return RDKC_FAILURE;
-        }
+	v_secure_system("/lib/rdk/sys_multisecupdate.sh '%s'#'%s'#'%s' '%s'#'%s'#'%s' '%s'#'%s'#'%s' '%s'#'%s'#'%s' '%s'#'%s'#'%s' ",
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_ENABLE, (char*)cvrConfig->enable,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_DURATION, (char*)cvrConfig->cvr_segment_info.duration,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_FORMAT, (char*)cvrConfig->cvr_segment_info.format,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_ADDRESS, (char*)cvrConfig->url,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_AUTH, (char*)cvrConfig->auth_token);
 
-	if(!strcmp(tag, XH_TAG_NAME_CVR))
-        {
-		cvrConfig = (cvr_provision_info_t*) config;
+	/*char cmd_buf[1024] = {0};
+	snprintf(cmd_buf, sizeof(cmd_buf), "/lib/rdk/sys_multisecupdate.sh '%s'#'%s'#'%s' '%s'#'%s'#'%s' '%s'#'%s'#'%s' '%s'#'%s'#'%s' '%s'#'%s'#'%s' ",
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_ENABLE, (char*)cvrConfig->enable,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_DURATION, (char*)cvrConfig->cvr_segment_info.duration,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_FORMAT, (char*)cvrConfig->cvr_segment_info.format,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_ADDRESS, (char*)cvrConfig->url,
+					(char*)SEC_CLOUD_RECORDER,(char*)CLOUD_RECORDER_VIDEO_AUTH, (char*)cvrConfig->auth_token);
+	system(cmd_buf);*/
 
-		if((PRO_SetInt((char*)SEC_CLOUD_RECORDER, (char*)CLOUD_RECORDER_ENABLE, atoi(cvrConfig->enable), (char*)CONF_FILE)) != 0)
+	if(abrBitrateChanged)
+	{
+		/* Store ABR configuration in AbrTargetBitrate structure  */
+		AbrTargetBitrate cvr_lbr_temp;
+		memset(&cvr_lbr_temp, 0, sizeof(cvr_lbr_temp));
+
+		if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.min) > 0)
 		{
-			perror("\nFailed to PRO_SetInt CVR Enable in system.conf \n");
-			retVal = RDKC_FAILURE;
+			cvr_lbr_temp.no_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.min);
 		}
 
-		if((PRO_SetInt((char*)SEC_CLOUD_RECORDER, (char*)CLOUD_RECORDER_VIDEO_DURATION, atoi(cvrConfig->cvr_segment_info.duration), (char*)CONF_FILE)) != 0)
+		if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.max) > 0)
 		{
-			perror("\nFailed to PRO_SetInt CVR video duration in system.conf \n");
-			retVal = RDKC_FAILURE;
+			cvr_lbr_temp.high_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.max);
 		}
 
-		if((PRO_SetInt((char*)SEC_CLOUD_RECORDER, (char*)CLOUD_RECORDER_VIDEO_FORMAT, atoi(cvrConfig->cvr_segment_info.format), (char*)CONF_FILE)) != 0)
+		if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.low) > 0)
 		{
-			perror("\nFailed to PRO_SetInt CVR video format in system.conf \n");
-			retVal = RDKC_FAILURE;
+			cvr_lbr_temp.low_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.low);
 		}
 
-		if((PRO_SetStr((char*)SEC_CLOUD_RECORDER, (char*)CLOUD_RECORDER_VIDEO_ADDRESS, (char*)cvrConfig->url, (char*)CONF_FILE)) != 0)
+		if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.med) > 0)
 		{
-			perror("\nFailed to PRO_SetStr CVR polling url in system.conf \n");
-			retVal = RDKC_FAILURE;
+			cvr_lbr_temp.mid_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.med);
 		}
 
-		if((PRO_SetStr((char*)SEC_CLOUD_RECORDER, (char*)CLOUD_RECORDER_VIDEO_AUTH, (char*)cvrConfig->auth_token, (char*)CONF_FILE)) != 0)
-		{
-			perror("\nFailed to PRO_SetStr CVR polling auth token in system.conf \n");
-			retVal = RDKC_FAILURE;
-		}
-
-		if(abrBitrateChanged)
-		{
-			/* Store ABR configuration in AbrTargetBitrate structure  */
-			AbrTargetBitrate cvr_lbr_temp;
-			memset(&cvr_lbr_temp, 0, sizeof(cvr_lbr_temp));
-
-			if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.min) > 0)
-			{
-				cvr_lbr_temp.no_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.min);
-			}
-
-			if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.max) > 0)
-			{
-			    cvr_lbr_temp.high_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.max);
-			}
-
-			if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.low) > 0)
-			{
-				cvr_lbr_temp.low_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.low);
-			}
-
-			if (atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.med) > 0)
-			{
-				cvr_lbr_temp.mid_mot_bitrate = atoi(cvrConfig->cvr_segment_info.cvr_lbr_info.med);
-			}
-
-			/* Store received ABR configuration to system conf file. */
-			if (abrSystemConfigWrite(&cvr_lbr_temp) != RDKC_SUCCESS) {
-				perror("\nABR config write failed \n");
-			}
+		/* Store received ABR configuration to system conf file. */
+		if (abrSystemConfigWrite(&cvr_lbr_temp) != RDKC_SUCCESS) {
+			perror("\nABR config write failed \n");
 		}
 	}
-	
+
 	//send signal to cvr_daemon
 	sendsignaltoprocess("cvr_daemon_kvs",SIGUSR1);
 
 	return retVal;
-}
-
-/** @description Read the system config params from system.conf.
- *  @param tag : Module Name.
- *  @param config : Module Struct.
- *  @return integer (RDKC_SUCCESS if success, RDKC_FAILURE if failure).
- */
-int systemConfigRead(char* tag, void* config)
-{
-	if((tag == NULL) || (config == NULL))
-	{
-		perror("systemConfigRead Invalid Params \n");
-		return RDKC_FAILURE;
-	}
-
-	FILE *fd = NULL;
-    	fd = fopen(CONF_FILE,"rt");
-	int polling_enable = 0;
-
-	if((PRO_GetInt((char*)SEC_CLOUD_RECORDER, (char*)CLOUD_RECORDER_ENABLE, &polling_enable, fd)) != 0)
-	{
-		perror("\nFailed to PRO_GetInt CVR recorder enable from system.conf \n");
-		return RDKC_FAILURE;
-	}
-	/* ToDo : Copy system config params from get_param_val */
-
-	return RDKC_SUCCESS;
 }
 
 #define  DEF_CVR_CHANNEL                3
