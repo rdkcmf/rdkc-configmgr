@@ -153,7 +153,12 @@ extern "C"
 #define XH_ATTR_AUDIO                      "audio"
 #endif
 
-
+#if defined ( CONFIGMGR_PLATFORM_RPI )
+#define SYSTEM_CONF                 "/mnt/ramdisk/env/system.conf"
+#define SEC_USER		    "USER"
+#define USER_ADMIN_NAME		    "admin_name"
+#define USER_ADMIN_PASSWORD	    "admin_password"
+#endif
 
 typedef struct {
 	char enable[CONFIG_ATTR_MAX];

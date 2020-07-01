@@ -18,7 +18,7 @@
 **/
 
 #include "polling_config.h"
-#ifndef OSI
+#if !defined ( OSI ) && !defined ( CONFIGMGR_PLATFORM_RPI )
 #include "PRO_file.h"
 #include "conf_sec.h"
 #include "sc_tool.h"
