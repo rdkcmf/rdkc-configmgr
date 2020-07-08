@@ -109,6 +109,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->width, Rcrf->width)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->quality, Rcrf->quality)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
 	}
 	else if(!strcmp(CVRSTATS_CONFIG_FILE, configFile))
 	{
@@ -118,6 +119,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->enabled, Rcrf->enabled)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->failurePercent, Rcrf->failurePercent)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
 	}
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
