@@ -28,11 +28,8 @@ int sendsignaltoprocess(const char* processname,int signalname)
 {
 	pid_t pid = -1;
 	FILE *inFp = NULL;
-	//char command[32];
-	//sprintf(command, "pidof %s", processname);
-	//if (!(inFp = popen(command, "r"))) {
-        if (!(inFp = v_secure_popen("r","pidof %s", processname))) {
-		printf("\n v_secure_popen : Unable to locate process %s\n",processname);
+        if (!(inFp = v_secure_popen("r","pgrep %s", processname))) {
+		printf("\n Unable to locate process %s\n",processname);
 		return -1;
 	}
 
