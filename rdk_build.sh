@@ -56,12 +56,12 @@ export RDK_DIR=$RDK_PROJECT_ROOT_PATH
 
 if [ "$XCAM_MODEL" == "SCHC2" ]; then
 . ${RDK_PROJECT_ROOT_PATH}/build/components/amba/sdk/setenv2
-elif [ "$XCAM_MODEL" == "SERXW3" ] || [ "$XCAM_MODEL" == "SERICAM2" ]; then
+else
 . ${RDK_PROJECT_ROOT_PATH}/build/components/sdk/setenv2
-else #No Matching platform
-    echo "Source environment that include packages for your platform. The environment variables PROJ_PRERULE_MAK_FILE should refer to the platform s PreRule make"
 fi
-
+if [ "$XCAM_MODEL" == "SERXW3" ] || [ "$XCAM_MODEL" == "SERICAM2" ] || [ "$XCAM_MODEL" == "SCHC2" ]; then
+export SOC_JSON_CONFIG_ENABLE=true
+fi
 # parse arguments
 INITIAL_ARGS=$@
 
@@ -103,7 +103,6 @@ ARGS=$@
 # component-specific vars
 export FSROOT=${RDK_FSROOT_PATH}
 export JAVA_HOME=$(readlink -f /usr/bin/javac | sed "s:/bin/javac::")
-export SOC_JSON_CONFIG_ENABLE=true
 
 # functional modules
 
@@ -147,7 +146,7 @@ function install()
     if [ -f "config/src/libconfigmanager.so" ]; then
        cp config/src/libconfigmanager.so ${RDK_FSROOT_PATH}/usr/lib
        cp config/dev_config.txt ${RDK_FSROOT_PATH}/etc
-       cp config/src/polling/SampleApp/polling_config ${RDK_FSROOT_PATH}/../src/vendor/img/fs/shadow_root/usr/local/bin/
+   #    cp config/src/polling/SampleApp/polling_config ${RDK_FSROOT_PATH}/usr/local/bin/
     fi
     if [ -f "config/src/polling/soc/libsystemconfig.so" ]; then
        cp config/src/polling/soc/libsystemconfig.so ${RDK_FSROOT_PATH}/usr/lib

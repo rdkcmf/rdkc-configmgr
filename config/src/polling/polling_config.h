@@ -51,6 +51,7 @@ extern "C"
 #define KVS_CONFIG_FILE "/opt/usr_config/kvs.conf"
 #define LUX_CONFIG_FILE "/opt/usr_config/lux.conf"
 #define SECURITY_CONFIG_FILE "/opt/usr_config/sys.conf"
+#define SENSOR_CONFIG_FILE "/opt/usr_config/sensor.conf"
 #define MAX_ERROR_COUNT				5
 #define PARAM_LEN				128
 #define URL_LEN					1024
@@ -118,6 +119,7 @@ extern "C"
 #define XH_ATTR_RESOLUTION                 "resolution"
 #define XH_ATTR_FPS                        "fps"
 #define XH_ATTR_GOP                        "gop"
+#define XH_ATTR_HDR                        "hdr"
 #define XH_ATTR_ENV                        "env"
 #define XH_ATTR_SENSITIVITY                "sensitivity"
 #define XH_TAG_NAME_DISABLED               "disabled"
@@ -151,7 +153,12 @@ extern "C"
 #define XH_ATTR_AUDIO                      "audio"
 #endif
 
-
+#if defined ( CONFIGMGR_PLATFORM_RPI )
+#define SYSTEM_CONF                 "/mnt/ramdisk/env/system.conf"
+#define SEC_USER		    "USER"
+#define USER_ADMIN_NAME		    "admin_name"
+#define USER_ADMIN_PASSWORD	    "admin_password"
+#endif
 
 typedef struct {
 	char enable[CONFIG_ATTR_MAX];
@@ -236,6 +243,14 @@ typedef struct {
 } detection_provision_info_t;
 
 typedef struct {
+    char night2day[CONFIG_ATTR_MAX];
+    char day2night[CONFIG_ATTR_MAX];
+    char hdr[CONFIG_ATTR_MAX];
+    char sensitivity[CONFIG_ATTR_MAX];
+    char env[CONFIG_ATTR_MAX];
+} sensor_config_info_t;
+
+typedef struct {
     char motion_enable[CONFIG_ATTR_MAX];
     char human_enable[CONFIG_ATTR_MAX];
     char tamper_enable[CONFIG_ATTR_MAX];
@@ -317,6 +332,20 @@ int readEventConfig(events_provision_info_t *crf);
  */
 int writeEventConfig(events_provision_info_t *crf);
 
+/**
+ * @brief read the sensor configuration.
+ * @param name is the  sensor_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+*/
+int readSensorConfig(sensor_config_info_t *cnf);
+
+/**
+ * @brief write the sensor  configuration.
+ * @param name is the sensor_config_info_t.
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+
+int writeSensorConfig(sensor_config_info_t *cnf);
 /**
  * @brief Get the EMS configurations.
  * @param name is the ems_provision_info_t.

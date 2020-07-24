@@ -18,10 +18,11 @@
 **/
 
 #include "polling_config.h"
-
+#if !defined ( OSI ) && !defined ( CONFIGMGR_PLATFORM_RPI )
 #include "PRO_file.h"
 #include "conf_sec.h"
 #include "sc_tool.h"
+#endif
 #include "RFCConfigAPI.h"
 #include "RFCCommon.h"
 
@@ -109,6 +110,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->width, Rcrf->width)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->quality, Rcrf->quality)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
 	}
 	else if(!strcmp(CVRSTATS_CONFIG_FILE, configFile))
 	{
@@ -118,7 +120,18 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->enabled, Rcrf->enabled)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->failurePercent, Rcrf->failurePercent)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
 	}
+	else if(!strcmp(SENSOR_CONFIG_FILE, configFile))
+        {       
+                sensor_config_info_t *Wcrf = (sensor_config_info_t *)WcrfIn;
+                sensor_config_info_t *Rcrf = (sensor_config_info_t *)RcrfIn;
+                if(strcmp(Wcrf->hdr, Rcrf->hdr)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->night2day, Rcrf->night2day)) return RDKC_SUCCESS; 
+                if(strcmp(Wcrf->day2night, Rcrf->day2night)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->env, Rcrf->env)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->sensitivity, Rcrf->sensitivity)) return RDKC_SUCCESS;
+        }
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
 		kvs_provision_info_t *Wcrf = (kvs_provision_info_t*)WcrfIn;
@@ -729,6 +742,132 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 	fclose(writeFile);
         rename(DETECTION_CONFIG_FILE".new",DETECTION_CONFIG_FILE);
 	return RDKC_SUCCESS;
+}
+/**
+ * @brief read the sensor configuration.
+ * @param name is the  sensor_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+*/
+int readSensorConfig(sensor_config_info_t *crf)
+{
+	FILE *readFile;
+        int retVal = RDKC_FAILURE;
+
+        if(crf == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+        readFile = fopen(SENSOR_CONFIG_FILE, "r");
+        if(readFile == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+        if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
+        {
+                perror("Error while accquiring mutex!!\n ");
+                fclose(readFile);
+                return RDKC_ERR_CONF_WRITE_INPROGRESS;
+        }
+
+        retVal = readValues(readFile, XH_ATTR_HDR, crf->hdr);
+        retVal = readValues(readFile, XH_ATTR_DAY2NIGHT, crf->day2night);
+        retVal = readValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
+        retVal = readValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
+        retVal = readValues(readFile, XH_ATTR_ENV, crf->env);
+
+        if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
+        {
+                perror("Error While Releasing Mutex!!\n ");
+                fclose(readFile);
+                return RDKC_FAILURE;
+        }
+
+        fclose(readFile);
+        return retVal;
+
+}
+
+/**
+ * @brief write the sensor  configuration.
+ * @param name is the sensor_config_info_t.
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+
+int writeSensorConfig(sensor_config_info_t *crf)
+{
+        FILE *writeFile;
+        char buffer[DATA_LEN];
+        int retVal = RDKC_FAILURE;
+        sensor_config_info_t *Rcrf;
+
+        if(crf == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+
+        Rcrf = (sensor_config_info_t*)malloc (sizeof(sensor_config_info_t));
+        retVal = readSensorConfig(Rcrf);
+        if(retVal == RDKC_SUCCESS)
+        {
+                /* Check if data to be set is already set, if yes, return error */
+                retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)SENSOR_CONFIG_FILE);
+                if(retVal == RDKC_FAILURE)
+                {
+                        if(Rcrf)
+                                free(Rcrf);
+                        return RDKC_ERR_DATA_ALREADY_SET;
+                }
+        }
+
+        writeFile = fopen(SENSOR_CONFIG_FILE".new", "w");
+        if(writeFile == NULL)
+        {
+                if(Rcrf)
+                        free(Rcrf);
+                return RDKC_FAILURE;
+        }
+
+        if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
+        {
+        	perror("Error while accquiring mutex!!\n ");
+                if(writeFile)
+                        fclose(writeFile);
+                if(Rcrf)
+                        free(Rcrf);
+            	return RDKC_ERR_CONF_READ_INPROGRESS;
+        }
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_HDR, crf->hdr);
+        fputs((const char *) buffer, writeFile);
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_SENSITIVITY, crf->sensitivity);
+        fputs((const char *) buffer, writeFile);
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_ENV, crf->env);
+        fputs((const char *) buffer, writeFile);
+	
+	sprintf(buffer, "%s=%s\n", XH_ATTR_NIGHT2DAY, crf->night2day);
+        fputs((const char *) buffer, writeFile);
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
+        fputs((const char *) buffer, writeFile);
+
+        if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
+        {
+                perror("Error While Releasing Mutex!!\n ");
+                if(writeFile)
+                        fclose(writeFile);
+                if(Rcrf)
+                        free(Rcrf);
+                return RDKC_FAILURE;
+        }
+        free(Rcrf);
+        fflush(writeFile);
+        fsync(fileno(writeFile));
+        fclose(writeFile);
+        rename(SENSOR_CONFIG_FILE".new",SENSOR_CONFIG_FILE);
+        return RDKC_SUCCESS;
+
 }
 
 /**
@@ -1574,6 +1713,7 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
  */
 int writeUserCredentialInfo(usr_creds_info_t *crf)
 {
+#ifndef OSI 
         FILE *fp = NULL;
         char buffer[DATA_LEN];
         int retVal = RDKC_FAILURE;
@@ -1675,6 +1815,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
 #endif
         if(Rcrf)
              free(Rcrf);
+#endif
         return RDKC_SUCCESS;
 }
 
