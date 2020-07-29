@@ -1707,7 +1707,7 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
  */
 int writeUserCredentialInfo(usr_creds_info_t *crf)
 {
-#ifndef OSI 
+#if !defined ( OSI ) && !defined ( CONFIGMGR_PLATFORM_RPI )
         FILE *fp = NULL;
         char buffer[DATA_LEN];
         int retVal = RDKC_FAILURE;
