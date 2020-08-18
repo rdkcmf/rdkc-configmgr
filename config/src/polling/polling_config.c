@@ -26,7 +26,6 @@
 #include "RFCConfigAPI.h"
 #include "RFCCommon.h"
 
-static pthread_mutex_t polling_config_mutex;
 static int polling_inited = FALSE;
 int readValues(FILE *pFile, char *pToken, char *data);
 int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile);
@@ -176,10 +175,13 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 int readValues(FILE *pFile, char *pToken, char *data)
 {
 	char buffer[DATA_LEN];
-	char *keyValue;
-	if(pFile == NULL)
+	memset(buffer, 0, sizeof(DATA_LEN));
+	char *keyValue = NULL;
+	if(pFile == NULL) {
 		return RDKC_FAILURE;
-	/* Search the token in the config txt file and copy the value */
+	}
+
+        /* Search the token in the config txt file and copy the value */
 	fseek(pFile, 0, SEEK_SET);
 	while(fgets(buffer, DATA_LEN, pFile)!= NULL )
 	{
@@ -224,23 +226,10 @@ int readPollingConfig(_config_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
-	}
-
 	retVal = readValues(readFile, XH_ATTR_INTERVAL, crf->interval);
 	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -254,8 +243,9 @@ int writePollingConfig(_config_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
-	_config_t *Rcrf;
+	_config_t *Rcrf = NULL;
 
 	if(crf == NULL)
 	{
@@ -270,8 +260,10 @@ int writePollingConfig(_config_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)POLLING_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf =  NULL;
+                	}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -279,18 +271,11 @@ int writePollingConfig(_config_t *crf)
 	writeFile = fopen(POLLING_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+			Rcrf =  NULL;
+                }
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
@@ -302,16 +287,10 @@ int writePollingConfig(_config_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		return RDKC_FAILURE;
-	}
-	free(Rcrf);
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf =  NULL;
+        }
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -332,16 +311,11 @@ int readCloudRecorderConfig(cvr_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
-	readFile = fopen(CLOUDRECORDER_CONFIG_FILE, "r");
+	
+        readFile = fopen(CLOUDRECORDER_CONFIG_FILE, "r");
 	if(readFile == NULL)
 	{
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
 
 	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
@@ -358,12 +332,6 @@ int readCloudRecorderConfig(cvr_provision_info_t *crf)
 	retVal = readValues(readFile, XH_ATTR_FPS, crf->cvr_segment_info.cvr_stream_info.fps);
 	retVal = readValues(readFile, XH_ATTR_GOP, crf->cvr_segment_info.cvr_stream_info.gop);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -377,6 +345,7 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	cvr_provision_info_t *Rcrf;
 
@@ -393,8 +362,10 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)CLOUDRECORDER_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+                                Rcrf = NULL;
+                        }
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -402,19 +373,11 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 	writeFile = fopen(CLOUDRECORDER_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+                        Rcrf = NULL;
+                }
 		return RDKC_FAILURE;
-	}
-
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	bool abrBitrateChanged = false;
@@ -485,16 +448,10 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 	printf("%s(%d) \nSOC_JSON_CONFIG is not enabled in configMgr source code\n", __FUNCTION__, __LINE__);
 #endif
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -516,16 +473,11 @@ int readEventConfig(events_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
+	
 	readFile = fopen(EVENTS_CONFIG_FILE, "r");
 	if(readFile == NULL)
 	{
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
 
 	retVal = readValues(readFile, XH_TAG_NAME_MOTION, crf->motion_enable);
@@ -535,12 +487,6 @@ int readEventConfig(events_provision_info_t *crf)
 	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -554,6 +500,7 @@ int writeEventConfig(events_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	events_provision_info_t *Rcrf;
 
@@ -570,8 +517,10 @@ int writeEventConfig(events_provision_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)EVENTS_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf = NULL;
+			}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -579,18 +528,11 @@ int writeEventConfig(events_provision_info_t *crf)
 	writeFile = fopen(EVENTS_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+			Rcrf = NULL;
+		}
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_TAG_NAME_MOTION, crf->motion_enable);
@@ -611,16 +553,10 @@ int writeEventConfig(events_provision_info_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -647,23 +583,10 @@ int readDetectionConfig(detection_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
-	}
 
 	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->motion_enable);
 	retVal = readValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
 	retVal = readValues(readFile, XH_ATTR_ENV, crf->env);
-
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 
 	fclose(readFile);
 	return retVal;
@@ -678,6 +601,7 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	detection_provision_info_t *Rcrf;
 
@@ -694,8 +618,10 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)DETECTION_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf = NULL;
+			}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -703,19 +629,11 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 	writeFile = fopen(DETECTION_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+			Rcrf = NULL;
+		}
 		return RDKC_FAILURE;
-	}
-
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-        printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-	    return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->motion_enable);
@@ -727,16 +645,10 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_ENV, crf->env);
 	fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -757,16 +669,11 @@ int readSensorConfig(sensor_config_info_t *crf)
         {
                 return RDKC_FAILURE;
         }
+
         readFile = fopen(SENSOR_CONFIG_FILE, "r");
         if(readFile == NULL)
         {
                 return RDKC_FAILURE;
-        }
-        if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                perror("Error while accquiring mutex!!\n ");
-                fclose(readFile);
-                return RDKC_ERR_CONF_WRITE_INPROGRESS;
         }
 
         retVal = readValues(readFile, XH_ATTR_HDR, crf->hdr);
@@ -774,13 +681,6 @@ int readSensorConfig(sensor_config_info_t *crf)
         retVal = readValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
         retVal = readValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
         retVal = readValues(readFile, XH_ATTR_ENV, crf->env);
-
-        if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                perror("Error While Releasing Mutex!!\n ");
-                fclose(readFile);
-                return RDKC_FAILURE;
-        }
 
         fclose(readFile);
         return retVal;
@@ -797,6 +697,7 @@ int writeSensorConfig(sensor_config_info_t *crf)
 {
         FILE *writeFile;
         char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
         int retVal = RDKC_FAILURE;
         sensor_config_info_t *Rcrf;
 
@@ -813,8 +714,10 @@ int writeSensorConfig(sensor_config_info_t *crf)
                 retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)SENSOR_CONFIG_FILE);
                 if(retVal == RDKC_FAILURE)
                 {
-                        if(Rcrf)
-                                free(Rcrf);
+			if(Rcrf) {
+				free(Rcrf);
+				Rcrf = NULL;
+			}
                         return RDKC_ERR_DATA_ALREADY_SET;
                 }
         }
@@ -822,19 +725,11 @@ int writeSensorConfig(sensor_config_info_t *crf)
         writeFile = fopen(SENSOR_CONFIG_FILE".new", "w");
         if(writeFile == NULL)
         {
-                if(Rcrf)
-                        free(Rcrf);
+                if(Rcrf) {
+			free(Rcrf);
+			Rcrf = NULL;
+		}
                 return RDKC_FAILURE;
-        }
-
-        if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-        	perror("Error while accquiring mutex!!\n ");
-                if(writeFile)
-                        fclose(writeFile);
-                if(Rcrf)
-                        free(Rcrf);
-            	return RDKC_ERR_CONF_READ_INPROGRESS;
         }
 
         sprintf(buffer, "%s=%s\n", XH_ATTR_HDR, crf->hdr);
@@ -852,16 +747,11 @@ int writeSensorConfig(sensor_config_info_t *crf)
         sprintf(buffer, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
         fputs((const char *) buffer, writeFile);
 
-        if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                perror("Error While Releasing Mutex!!\n ");
-                if(writeFile)
-                        fclose(writeFile);
-                if(Rcrf)
-                        free(Rcrf);
-                return RDKC_FAILURE;
-        }
-        free(Rcrf);
+        if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
+	}
+
         fflush(writeFile);
         fsync(fileno(writeFile));
         fclose(writeFile);
@@ -884,16 +774,11 @@ int readEMSConfig(ems_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
+
 	readFile = fopen(EMS_CONFIG_FILE, "r");
 	if(readFile == NULL)
 	{
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
 
 	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
@@ -903,12 +788,6 @@ int readEMSConfig(ems_provision_info_t *crf)
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
         retVal = readValues(readFile, XH_ATTR_RESOLUTION, crf->resolution);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -922,6 +801,7 @@ int writeEMSConfig(ems_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	ems_provision_info_t *Rcrf;
 
@@ -938,8 +818,10 @@ int writeEMSConfig(ems_provision_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)EMS_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf = NULL;
+			}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -950,15 +832,6 @@ int writeEMSConfig(ems_provision_info_t *crf)
 		if(Rcrf)
 			free(Rcrf);
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
@@ -979,17 +852,10 @@ int writeEMSConfig(ems_provision_info_t *crf)
         sprintf(buffer, "%s=%s\n", XH_ATTR_RESOLUTION, crf->resolution);
         fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -1016,23 +882,11 @@ int readLiveCacheConfig(livecache_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
-	}
 
 	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
 	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -1046,6 +900,7 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	livecache_provision_info_t *Rcrf;
 
@@ -1062,8 +917,10 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)LIVECACHE_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf = NULL;
+			}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -1071,18 +928,11 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 	writeFile = fopen(LIVECACHE_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+			Rcrf = NULL;
+		}
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
@@ -1094,16 +944,10 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -1130,12 +974,6 @@ int readTNConfig(tn_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
-	}
 
 	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
 	retVal = readValues(readFile, XH_ATTR_HEIGHT, crf->height);
@@ -1144,12 +982,6 @@ int readTNConfig(tn_provision_info_t *crf)
 	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -1163,6 +995,7 @@ int writeTNConfig(tn_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	tn_provision_info_t *Rcrf;
 
@@ -1179,8 +1012,10 @@ int writeTNConfig(tn_provision_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)TN_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf = NULL;
+			}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -1188,18 +1023,11 @@ int writeTNConfig(tn_provision_info_t *crf)
 	writeFile = fopen(TN_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+			Rcrf = NULL;
+		}
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
@@ -1220,16 +1048,10 @@ int writeTNConfig(tn_provision_info_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
@@ -1281,6 +1103,7 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
 {
     FILE *writeFile;
     char buffer[DATA_LEN];
+    memset(buffer, 0, sizeof(DATA_LEN));
     int retVal = RDKC_FAILURE;
     cvrStats_provision_info_t *Rcrf;
 
@@ -1298,8 +1121,10 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
         retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)CVRSTATS_CONFIG_FILE);
         if(retVal == RDKC_FAILURE)
         {
-            if(Rcrf)
-                free(Rcrf);
+	    if(Rcrf) {
+	    	free(Rcrf);
+		Rcrf = NULL;
+	    }
             return RDKC_ERR_DATA_ALREADY_SET;
         }
     }
@@ -1307,18 +1132,11 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
     writeFile = fopen(CVRSTATS_CONFIG_FILE".new", "w");
     if(writeFile == NULL)
     {
-        if(Rcrf)
-            free(Rcrf);
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
+	}
         return RDKC_FAILURE;
-    }
-    if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-    {
-        printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-        if(writeFile)
-            fclose(writeFile);
-        if(Rcrf)
-            free(Rcrf);
-        return RDKC_ERR_CONF_READ_INPROGRESS;
     }
 
     sprintf(buffer, "%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
@@ -1336,16 +1154,10 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
     sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
     fputs((const char *) buffer, writeFile);
 
-    if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-    {
-        printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-        if(writeFile)
-            fclose(writeFile);
-        if(Rcrf)
-            free(Rcrf);
-        return RDKC_FAILURE;
+    if(Rcrf) {
+	free(Rcrf);
+	Rcrf = NULL;
     }
-    free(Rcrf);
     fflush(writeFile);
     fsync(fileno(writeFile));
     fclose(writeFile);
@@ -1362,16 +1174,11 @@ int readKVSConfig(kvs_provision_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
+	
 	readFile = fopen(KVS_CONFIG_FILE, "r");
 	if(readFile == NULL)
 	{
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		fclose(readFile);
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
 
 	/* Update the config file here */
@@ -1406,14 +1213,7 @@ int readKVSConfig(kvs_provision_info_t *crf)
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA);
         retVal = readValues(readFile, tmp_buff, crf->cert_CA_force);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	//retVal = RDKC_SUCCESS;
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		fclose(readFile);
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -1427,6 +1227,7 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	kvs_provision_info_t *Rcrf = NULL;
 
@@ -1459,18 +1260,6 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 			Rcrf = NULL;
 		}
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile) {
- 			fclose(writeFile);
-		}
-                if(Rcrf) {
-			free(Rcrf);
-			Rcrf = NULL;
-		}
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	/* Update the config file here */
@@ -1526,18 +1315,6 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 	sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA, crf->cert_CA_force);
         fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   	        if(Rcrf) {
-			free(Rcrf);
-			Rcrf = NULL;
-		}
-		return RDKC_FAILURE;
-	}
-
         if ( NULL != Rcrf ) {
 		free(Rcrf);
 		Rcrf = NULL;
@@ -1568,22 +1345,10 @@ int readLUXConfig(lux_threshold_info_t *crf)
 	{
 		return RDKC_FAILURE;
 	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_ERR_CONF_WRITE_INPROGRESS;
-	}
 
 	retVal = readValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
 	retVal = readValues(readFile, XH_ATTR_DAY2NIGHT, crf->day2night);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		fclose(readFile);
-		return RDKC_FAILURE;
-	}
 	fclose(readFile);
 	return retVal;
 }
@@ -1597,6 +1362,7 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 {
 	FILE *writeFile;
 	char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
         int file_fd;
 	lux_threshold_info_t *Rcrf;
@@ -1614,8 +1380,10 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 		retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)LUX_CONFIG_FILE);
 		if(retVal == RDKC_FAILURE)
 		{
-			if(Rcrf)
+			if(Rcrf) {
 				free(Rcrf);
+				Rcrf = NULL;
+			}
 			return RDKC_ERR_DATA_ALREADY_SET;
 		}
 	}
@@ -1623,18 +1391,11 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 	writeFile = fopen(LUX_CONFIG_FILE".new", "w");
 	if(writeFile == NULL)
 	{
-		if(Rcrf)
+		if(Rcrf) {
 			free(Rcrf);
+			Rcrf = NULL;
+		}
 		return RDKC_FAILURE;
-	}
-	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_NIGHT2DAY, crf->night2day);
@@ -1643,16 +1404,10 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 	sprintf(buffer, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
 	fputs((const char *) buffer, writeFile);
 
-	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-	{
-		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-		if(writeFile)
- 			fclose(writeFile);
-   		if(Rcrf)
-			free(Rcrf);
-		return RDKC_FAILURE;
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
 	}
-	free(Rcrf);
         file_fd=fileno(writeFile);
         fflush(writeFile);
         fsync(file_fd);
@@ -1680,22 +1435,10 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
         {
                 return RDKC_FAILURE;
         }
-        if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-                fclose(readFile);
-                return RDKC_ERR_CONF_WRITE_INPROGRESS;
-        }
 
         retVal = readValues(readFile, XH_ATTR_USER_NAME, crf->user_name);
         retVal = readValues(readFile, XH_ATTR_PASSWORD, crf->password);
 
-        if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-                fclose(readFile);
-                return RDKC_FAILURE;
-        }
         fclose(readFile);
         return retVal;
 }
@@ -1710,6 +1453,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
 #if !defined ( OSI ) && !defined ( CONFIGMGR_PLATFORM_RPI )
         FILE *fp = NULL;
         char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
         int retVal = RDKC_FAILURE;
         FILE *writeFile = NULL;
         usr_creds_info_t *Rcrf;
@@ -1738,13 +1482,14 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
           printf("%s(%d) Unable to open system conf file\n", __FUNCTION__, __LINE__);
         }  
 
-        //retVal = readUserCredentialInfo(Rcrf);
         /* Check if data to be set is already set, if yes, return error */
         retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)SECURITY_CONFIG_FILE);
         if(retVal == RDKC_FAILURE)
         {
-                if(Rcrf)
-                       free(Rcrf);
+		if(Rcrf) {
+			free(Rcrf);
+			Rcrf = NULL;
+		}
                 return RDKC_ERR_DATA_ALREADY_SET;
         }
 #ifdef XCAM2
@@ -1766,78 +1511,20 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
        SendSignal2AppsBySpecFile("xw3_monitor", SIGUSR1, "/tmp/xw3_monitor.lock");
 #endif
 
-#if 0
-        int file_fd;
-        //Set Security credentials to /opt/usr_config/sys.conf
-        writeFile = fopen(SECURITY_CONFIG_FILE".new", "w");
-        if(writeFile == NULL)
-        {
-                if(Rcrf)
-                        free(Rcrf);
-                return RDKC_FAILURE;
-        }
-        if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
-                if(writeFile)
-                        fclose(writeFile);
-                if(Rcrf)
-                        free(Rcrf);
-                return RDKC_ERR_CONF_READ_INPROGRESS;
-        }
-
-        sprintf(buffer, "%s=%s\n", XH_ATTR_USER_NAME, crf->user_name);
-        fputs((const char *) buffer, writeFile);
-
-        sprintf(buffer, "%s=%s\n", XH_ATTR_PASSWORD, crf->password);
-        fputs((const char *) buffer, writeFile);
-
-        if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-        {
-                printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
-                if(writeFile)
-                        fclose(writeFile);
-                if(Rcrf)
-                        free(Rcrf);
-                return RDKC_FAILURE;
-        }
-        file_fd = fileno(writeFile);
-        fflush(writeFile);
-        fsync(file_fd);
-        fclose(writeFile);
-        rename(SECURITY_CONFIG_FILE".new",SECURITY_CONFIG_FILE);
-#endif
-        if(Rcrf)
-             free(Rcrf);
+	if(Rcrf) {
+		free(Rcrf);
+		Rcrf = NULL;
+	}
 #endif
         return RDKC_SUCCESS;
 }
 
 int polling_config_init()
 {
-	int retVal = RDKC_FAILURE;
-	if(polling_inited == TRUE)
-	{
-		return RDKC_ERR_ALREADY_INITED;
-	}
-	retVal = pthread_mutex_init(&polling_config_mutex, NULL);
-	if(retVal != 0)
-	{
-		printf("%s(%d) Error Initializing Mutex!!!\n", __FUNCTION__, __LINE__);
-		return RDKC_FAILURE;
-	}
-
-	polling_inited = TRUE;
-	//printf("%s(%d) \nPolling Inited\n", __FUNCTION__, __LINE__);
 	return RDKC_SUCCESS;
 }
 
 int polling_config_exit()
 {
-	pthread_mutex_destroy(&polling_config_mutex);
-	polling_inited = FALSE;
-	//printf("%s(%d) \nPolling Exited\n", __FUNCTION__, __LINE__);
 	return RDKC_SUCCESS;
 }
-
-/******* END *********/
