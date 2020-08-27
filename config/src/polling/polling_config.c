@@ -214,19 +214,19 @@ int readPollingConfig(_config_t *crf)
 	int retVal = RDKC_FAILURE;
 	if(crf == NULL)
 	{
-		printf("crf is null\n");
+		printf("%s(%d) crf is null\n", __FUNCTION__, __LINE__);
 		return RDKC_FAILURE;
 	}
 	readFile = fopen(POLLING_CONFIG_FILE, "r");
 	if(readFile == NULL)
 	{
-		printf("No file named %s\n",POLLING_CONFIG_FILE);
+		printf("%s(%d) No file named %s\n",__FUNCTION__, __LINE__,POLLING_CONFIG_FILE);
 		return RDKC_FAILURE;
 	}
 
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -237,7 +237,7 @@ int readPollingConfig(_config_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -289,7 +289,7 @@ int writePollingConfig(_config_t *crf)
  			fclose(writeFile);
    		if(Rcrf)
 			free(Rcrf);
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		return RDKC_ERR_CONF_READ_INPROGRESS;
 	}
 
@@ -308,7 +308,7 @@ int writePollingConfig(_config_t *crf)
  			fclose(writeFile);
    		if(Rcrf)
 			free(Rcrf);
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		return RDKC_FAILURE;
 	}
 	free(Rcrf);
@@ -339,7 +339,7 @@ int readCloudRecorderConfig(cvr_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -360,7 +360,7 @@ int readCloudRecorderConfig(cvr_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -409,7 +409,7 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -479,15 +479,15 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 #if defined (SOC_JSON_CONFIG_ENABLE)
 	if(systemConfigWrite(XH_TAG_NAME_CVR, (void*)crf, abrBitrateChanged)!=RDKC_SUCCESS) // Write the config params to system.conf
 	{
-                perror("Polling systemConfigWrite write cvr config to system.conf failed");
+                printf("%s(%d) Polling systemConfigWrite write cvr config to system.conf failed\n", __FUNCTION__, __LINE__);
 	}
 #else
-	perror("\nSOC_JSON_CONFIG is not enabled in configMgr source code\n");
+	printf("%s(%d) \nSOC_JSON_CONFIG is not enabled in configMgr source code\n", __FUNCTION__, __LINE__);
 #endif
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -523,7 +523,7 @@ int readEventConfig(events_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -537,7 +537,7 @@ int readEventConfig(events_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -585,7 +585,7 @@ int writeEventConfig(events_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -613,7 +613,7 @@ int writeEventConfig(events_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -649,7 +649,7 @@ int readDetectionConfig(detection_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -660,7 +660,7 @@ int readDetectionConfig(detection_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -710,7 +710,7 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-        perror("Error while accquiring mutex!!\n ");
+        printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -729,7 +729,7 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -891,7 +891,7 @@ int readEMSConfig(ems_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -905,7 +905,7 @@ int readEMSConfig(ems_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -953,7 +953,7 @@ int writeEMSConfig(ems_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -981,7 +981,7 @@ int writeEMSConfig(ems_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1018,7 +1018,7 @@ int readLiveCacheConfig(livecache_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -1029,7 +1029,7 @@ int readLiveCacheConfig(livecache_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -1077,7 +1077,7 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1096,7 +1096,7 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1132,7 +1132,7 @@ int readTNConfig(tn_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -1146,7 +1146,7 @@ int readTNConfig(tn_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -1194,7 +1194,7 @@ int writeTNConfig(tn_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1222,7 +1222,7 @@ int writeTNConfig(tn_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1249,18 +1249,15 @@ int readCVRStatsConfig(cvrStats_provision_info_t *crf)
 
     if(crf == NULL)
     {
+	printf("%s(%d) Input cvr stat conf is null!!\n", __FUNCTION__, __LINE__);
         return RDKC_FAILURE;
     }
+
     readFile = fopen(CVRSTATS_CONFIG_FILE, "r");
     if(readFile == NULL)
     {
+	printf("%s(%d) Failed to open cvr stats conf!!\n", __FUNCTION__, __LINE__);
         return RDKC_FAILURE;
-    }
-    if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
-    {
-        perror("Error while accquiring mutex!!\n ");
-        fclose(readFile);
-        return RDKC_ERR_CONF_WRITE_INPROGRESS;
     }
 
     retVal = readValues(readFile, XH_ATTR_INTERVAL, crf->interval);
@@ -1269,13 +1266,9 @@ int readCVRStatsConfig(cvrStats_provision_info_t *crf)
     retVal = readValues(readFile, XH_ATTR_URL, crf->url);
     retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
-    if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
-    {
-        perror("Error While Releasing Mutex!!\n ");
-        fclose(readFile);
-        return RDKC_FAILURE;
-    }
     fclose(readFile);
+    readFile=NULL;
+
     return retVal;
 }
 
@@ -1293,6 +1286,7 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
 
     if(crf == NULL)
     {
+	printf("%s(%d) Input cvr stat conf is null!!\n", __FUNCTION__, __LINE__);
         return RDKC_FAILURE;
     }
 
@@ -1319,7 +1313,7 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
     }
     if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
     {
-        perror("Error while accquiring mutex!!\n ");
+        printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
         if(writeFile)
             fclose(writeFile);
         if(Rcrf)
@@ -1344,7 +1338,7 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
 
     if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
     {
-        perror("Error While Releasing Mutex!!\n ");
+        printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
         if(writeFile)
             fclose(writeFile);
         if(Rcrf)
@@ -1376,7 +1370,7 @@ int readKVSConfig(kvs_provision_info_t *crf)
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
 		fclose(readFile);
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
 
@@ -1417,7 +1411,7 @@ int readKVSConfig(kvs_provision_info_t *crf)
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
 		fclose(readFile);
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		return RDKC_FAILURE;
 	}
 	fclose(readFile);
@@ -1468,7 +1462,7 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile) {
  			fclose(writeFile);
 		}
@@ -1534,7 +1528,7 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    	        if(Rcrf) {
@@ -1576,7 +1570,7 @@ int readLUXConfig(lux_threshold_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_ERR_CONF_WRITE_INPROGRESS;
 	}
@@ -1586,7 +1580,7 @@ int readLUXConfig(lux_threshold_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		fclose(readFile);
 		return RDKC_FAILURE;
 	}
@@ -1635,7 +1629,7 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 	}
 	if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error while accquiring mutex!!\n ");
+		printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1651,7 +1645,7 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 
 	if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
 	{
-		perror("Error While Releasing Mutex!!\n ");
+		printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
 		if(writeFile)
  			fclose(writeFile);
    		if(Rcrf)
@@ -1688,7 +1682,7 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
         }
         if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
         {
-                perror("Error while accquiring mutex!!\n ");
+                printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
                 fclose(readFile);
                 return RDKC_ERR_CONF_WRITE_INPROGRESS;
         }
@@ -1698,7 +1692,7 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
 
         if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
         {
-                perror("Error While Releasing Mutex!!\n ");
+                printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
                 fclose(readFile);
                 return RDKC_FAILURE;
         }
@@ -1713,7 +1707,7 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
  */
 int writeUserCredentialInfo(usr_creds_info_t *crf)
 {
-#ifndef OSI 
+#if !defined ( OSI ) && !defined ( CONFIGMGR_PLATFORM_RPI )
         FILE *fp = NULL;
         char buffer[DATA_LEN];
         int retVal = RDKC_FAILURE;
@@ -1731,17 +1725,17 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
         if (NULL != fp){
           retVal = PRO_GetStr(SEC_USER, USER_ADMIN_NAME, Rcrf->user_name, sizeof(Rcrf->user_name),fp);
           if (retVal != 0)
-            perror("Unable to get user name");
+            printf("%s(%d) Unable to get user name\n", __FUNCTION__, __LINE__);
 
           retVal = PRO_GetStr(SEC_USER, USER_ADMIN_PASSWORD, Rcrf->password, sizeof(Rcrf->password),fp);
           if (retVal != 0)
-            perror("Unable to get password");
+            printf("%s(%d) Unable to get password\n", __FUNCTION__, __LINE__);
  
           //close system config
           fclose(fp);
           fp = NULL;
         }else{
-          perror("Unable to open system conf file");
+          printf("%s(%d) Unable to open system conf file\n", __FUNCTION__, __LINE__);
         }  
 
         //retVal = readUserCredentialInfo(Rcrf);
@@ -1757,15 +1751,15 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
         //Set Username and Password in system.conf
         retVal = PRO_SetStr(SEC_USER, USER_ADMIN_NAME, crf->user_name, SYSTEM_CONF);
         if (retVal != 0)
-                perror("Unable to set User Admin Name");
+                printf("%s(%d) Unable to set User Admin Name\n", __FUNCTION__, __LINE__);
 
         retVal = PRO_SetExt(SEC_USER, USER_ADMIN_PASSWORD, crf->password, SYSTEM_CONF);
         if (retVal != 0)
-                perror("Unable to set Admin Password");
+                printf("%s(%d) Unable to set Admin Password\n", __FUNCTION__, __LINE__);
 
         retVal = PRO_SetInt(SEC_USER, USER_LOGIN_CHECK, 1, SYSTEM_CONF);
         if(retVal != 0)
-                perror("Unable to set user_login check");
+                printf("%s(%d) Unable to set user_login check\n", __FUNCTION__, __LINE__);
 
        system("usr/local/bin/auth -adm >/dev/null 2>/dev/null");
        SendSignal2AppsBySpecFile("hydra", SIGUSR1, "/tmp/hydra.lock");
@@ -1784,7 +1778,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
         }
         if(pthread_mutex_lock(&polling_config_mutex)!=RDKC_SUCCESS)
         {
-                perror("Error while accquiring mutex!!\n ");
+                printf("%s(%d) Error while accquiring mutex!!\n", __FUNCTION__, __LINE__);
                 if(writeFile)
                         fclose(writeFile);
                 if(Rcrf)
@@ -1800,7 +1794,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
 
         if(pthread_mutex_unlock(&polling_config_mutex)!=RDKC_SUCCESS)
         {
-                perror("Error While Releasing Mutex!!\n ");
+                printf("%s(%d) Error While Releasing Mutex!!\n", __FUNCTION__, __LINE__);
                 if(writeFile)
                         fclose(writeFile);
                 if(Rcrf)
@@ -1829,12 +1823,12 @@ int polling_config_init()
 	retVal = pthread_mutex_init(&polling_config_mutex, NULL);
 	if(retVal != 0)
 	{
-		printf("%s [%d] Error Initializing Mutex!!!\n", __FILE__, __LINE__);
+		printf("%s(%d) Error Initializing Mutex!!!\n", __FUNCTION__, __LINE__);
 		return RDKC_FAILURE;
 	}
 
 	polling_inited = TRUE;
-	//printf("\nPolling Inited\n");
+	//printf("%s(%d) \nPolling Inited\n", __FUNCTION__, __LINE__);
 	return RDKC_SUCCESS;
 }
 
@@ -1842,7 +1836,7 @@ int polling_config_exit()
 {
 	pthread_mutex_destroy(&polling_config_mutex);
 	polling_inited = FALSE;
-	//printf("\nPolling Exited\n");
+	//printf("%s(%d) \nPolling Exited\n", __FUNCTION__, __LINE__);
 	return RDKC_SUCCESS;
 }
 

@@ -142,7 +142,8 @@ thumbnail_upload_auth_token=
 thumbnail_upload_passive_interval=600
 thumbnail_upload_active_interval=30
 thumbnail_active_upload_duration=0
-thumbnail_buf_id=0
+thumbnail_buf_id_0=0
+thumbnail_buf_id_2=2
 
 ##Audio Anaylatics
 aa_threshold_smoke_alarm=13

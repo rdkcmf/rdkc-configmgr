@@ -98,7 +98,8 @@ extern "C"
 #define THUMBNAIL_UPLOAD_PASSIVE_INTERVAL   "thumbnail_upload_passive_interval"
 #define THUMBNAIL_UPLOAD_ACTIVE_INTERVAL    "thumbnail_upload_active_interval"
 #define THUMBNAIL_ACTIVE_UPLOAD_DURATION    "thumbnail_active_upload_duration"
-#define THUMBNAIL_BUF_ID		    "thumbnail_buf_id"
+#define THUMBNAIL_BUF_ID_0		    "thumbnail_buf_id_0"
+#define THUMBNAIL_BUF_ID_2		    "thumbnail_buf_id_2"
 
 //RKDC AUDIO ANALYTIC
 #define AA_THRESHOLD_SMOKE_ALARM            "aa_threshold_smoke_alarm"
