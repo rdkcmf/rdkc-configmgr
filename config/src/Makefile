@@ -29,7 +29,6 @@ BUILD_ROOT_DIR  := $(CONFIG_MNGR_ROOT_DIR)/..
 # ConfigManager Includes
 INCPATH += $(CONFIG_MNGR_ROOT_DIR)/include
 INCPATH += $(CONFIG_MNGR_ROOT_DIR)/config/include
-INCPATH += $(CONFIG_MNGR_ROOT_DIR)/config/configMgrSection
 
 CFLAGS += $(addprefix -I, $(INCPATH))
 CFLAGS += -fPIC -Wall
@@ -43,7 +42,7 @@ CFLAGS  += -DOSI
 endif
 RM = rm -f
 TARGET_LIB = libconfigmanager.so
-SRCS = rdkc_mutex_handle.c $(CONFIG_MNGR_ROOT_DIR)/config/configMgrSection/rdkc_config_sections.c rdkc_config_params.c polling/polling_config.c
+SRCS = rdkc_mutex_handle.c rdkc_config_params.c polling/polling_config.c
 
 OBJS = $(SRCS:.c=.o)
 ifeq ($(SOC_JSON_CONFIG_ENABLE),true)
