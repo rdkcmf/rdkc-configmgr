@@ -52,6 +52,7 @@ extern "C"
 #define LUX_CONFIG_FILE "/opt/usr_config/lux.conf"
 #define SECURITY_CONFIG_FILE "/opt/usr_config/sys.conf"
 #define SENSOR_CONFIG_FILE "/opt/usr_config/sensor.conf"
+#define DING_CONFIG_FILE "/opt/usr_config/ding.conf"
 #define MAX_ERROR_COUNT				5
 #define PARAM_LEN				128
 #define URL_LEN					1024
@@ -242,6 +243,13 @@ typedef struct {
     char sensitivity[CONFIG_ATTR_MAX];
     char env[CONFIG_ATTR_MAX];
 } sensor_config_info_t;
+//ding": {"enabled":true,"url": "" , "auth": "", "quiteTime":"" }
+typedef struct {
+    char enable[CONFIG_ATTR_MAX];
+    char url[CONFIG_STRING_MAX];
+    char auth_token[AUTH_TOKEN_MAX];
+    char quite_interval[CONFIG_ATTR_MAX];
+} ding_config_info_t;
 
 typedef struct {
     char motion_enable[CONFIG_ATTR_MAX];
@@ -324,6 +332,21 @@ int readEventConfig(events_provision_info_t *crf);
  * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
  */
 int writeEventConfig(events_provision_info_t *crf);
+
+/**
+ * @brief read the ding configuration.
+ * @param name is the  ding_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+*/
+int readDingConfig(ding_config_info_t *cnf);
+
+/**
+ * @brief write the ding configuration.
+ * @param name is the ding_config_info_t.
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+
+int writeDingConfig(ding_config_info_t *cnf);
 
 /**
  * @brief read the sensor configuration.

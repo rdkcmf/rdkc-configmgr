@@ -131,6 +131,15 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
                 if(strcmp(Wcrf->env, Rcrf->env)) return RDKC_SUCCESS;
                 if(strcmp(Wcrf->sensitivity, Rcrf->sensitivity)) return RDKC_SUCCESS;
         }
+	else if(!strcmp(DING_CONFIG_FILE, configFile))
+        {
+                ding_config_info_t *Wcrf = (ding_config_info_t *)WcrfIn;
+                ding_config_info_t *Rcrf = (ding_config_info_t *)RcrfIn;
+		if(strcmp(Wcrf->enable, Rcrf->enable)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->quite_interval, Rcrf->quite_interval)) return RDKC_SUCCESS;
+        }
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
 		kvs_provision_info_t *Wcrf = (kvs_provision_info_t*)WcrfIn;
@@ -562,6 +571,101 @@ int writeEventConfig(events_provision_info_t *crf)
 	fclose(writeFile);
         rename(EVENTS_CONFIG_FILE".new",EVENTS_CONFIG_FILE);
 	return RDKC_SUCCESS;
+}
+/**
+ * @brief read the  configuration.
+ * @param name is the  ding_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int readDingConfig(ding_config_info_t *crf)
+{       
+        FILE *readFile;
+        int retVal = RDKC_FAILURE;
+        
+        if(crf == NULL)
+        {       
+                return RDKC_FAILURE;
+        }
+        
+        readFile = fopen(DING_CONFIG_FILE, "r");
+        if(readFile == NULL)
+        {       
+                return RDKC_FAILURE;
+        }
+        
+        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = readValues(readFile, XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
+        retVal = readValues(readFile, XH_ATTR_URL, crf->url);
+        retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+        
+        fclose(readFile);
+        return retVal;
+}
+/**
+ * @brief write the ding configuration.
+ * @param name is the ding_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int writeDingConfig(ding_config_info_t *crf)
+{
+        FILE *writeFile;
+        char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
+        int retVal = RDKC_FAILURE;
+        ding_config_info_t *Rcrf;
+
+        if(crf == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+
+        Rcrf = (ding_config_info_t*)malloc (sizeof(ding_config_info_t));
+        retVal = readDingConfig(Rcrf);
+        if(retVal == RDKC_SUCCESS)
+        {
+                /* Check if data to be set is already set, if yes, return error */
+                retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)DING_CONFIG_FILE);
+                if(retVal == RDKC_FAILURE)
+                {
+                        if(Rcrf) {
+                                free(Rcrf);
+                                Rcrf = NULL;
+                        }
+                        return RDKC_ERR_DATA_ALREADY_SET;
+                }
+        }
+
+        writeFile = fopen(DING_CONFIG_FILE".new", "w");
+        if(writeFile == NULL)
+        {
+                if(Rcrf) {
+                        free(Rcrf);
+                        Rcrf = NULL;
+                }
+                return RDKC_FAILURE;
+        }
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+        fputs((const char *) buffer, writeFile);
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
+        fputs((const char *) buffer, writeFile);
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+        fputs((const char *) buffer, writeFile);
+
+        sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+        fputs((const char *) buffer, writeFile);
+
+        if(Rcrf) {
+                free(Rcrf);
+                Rcrf = NULL;
+        }
+        fflush(writeFile);
+        fsync(fileno(writeFile));
+        fclose(writeFile);
+        rename(DING_CONFIG_FILE".new",DING_CONFIG_FILE);
+        return RDKC_SUCCESS;
 }
 
 /**
