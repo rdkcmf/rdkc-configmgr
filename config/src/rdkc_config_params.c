@@ -117,6 +117,16 @@ static int get_usr_config(const char* name,char* value)
         return RDKC_FAILURE;
     }
 
+    //check file length
+    if (NULL != fpUsr) {
+        fseek (fpUsr, 0, SEEK_END);
+        int size = ftell(fpUsr);
+        if (0 == size) {
+            return RDKC_FAILURE;
+        }
+    }
+    fseek(fpUsr, 0, SEEK_SET);
+
     fgets(value,MAX_BUFFER_SIZE+1,fpUsr);
     value[strlen(value)-1] = '\0';
 
