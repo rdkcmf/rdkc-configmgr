@@ -144,6 +144,9 @@ extern "C"
 #define SMART_THUMBNAIL_UPLOAD_URL      "smart_thumbnail_upload_URL"
 #define SMART_THUMBNAIL_AUTH_CODE       "smart_thumbnail_auth_code"
 
+//Disable Crashportal Fallback
+#define DISABLECRASHPORTALFALLBACK      "DisableCrashPortalFallback"
+
 #endif
 //to suppress the motion event for below duration(in seconds)
 #define EVENT_QUIET_TIME	    "event_quiet_time"
