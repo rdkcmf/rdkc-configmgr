@@ -197,3 +197,6 @@ event_quiet_time=30
 #SMART_THUMBNAIL
 smart_thumbnail_upload_URL=<smart_thumbnail_upload_url>
 smart_thumbnail_auth_code=<smart_thumbnail_auth_code>
+
+#DISABLE CRASHPORTAL FALLBACK
+DisableCrashPortalFallback = false
