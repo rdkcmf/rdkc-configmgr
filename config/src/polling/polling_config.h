@@ -53,6 +53,7 @@ extern "C"
 #define SECURITY_CONFIG_FILE "/opt/usr_config/sys.conf"
 #define SENSOR_CONFIG_FILE "/opt/usr_config/sensor.conf"
 #define DING_CONFIG_FILE "/opt/usr_config/ding.conf"
+#define CHIME_CONFIG_FILE "/opt/usr_config/chime.conf"
 #define MAX_ERROR_COUNT				5
 #define PARAM_LEN				128
 #define URL_LEN					1024
@@ -149,6 +150,7 @@ extern "C"
 #define XH_ATTR_HEIGHT                     "height"
 #define XH_ATTR_WIDTH                      "width"
 #define XH_ATTR_QUALITY                    "quality"
+#define XH_ATTR_CHIME_TYPE                 "chime_type"
 #define _SUPPORT_AAC_
 #ifdef  _SUPPORT_AAC_
 #define XH_ATTR_AUDIO                      "audio"
@@ -251,6 +253,13 @@ typedef struct {
     char quite_interval[CONFIG_ATTR_MAX];
 } ding_config_info_t;
 
+
+//"chime": {"enabled":true/false,"chime_type": "analog/digital" }
+typedef struct {
+    char enable[CONFIG_ATTR_MAX];
+    char chime_type[CONFIG_STRING_MAX];
+} chime_config_info_t;
+
 typedef struct {
     char motion_enable[CONFIG_ATTR_MAX];
     char human_enable[CONFIG_ATTR_MAX];
@@ -347,6 +356,21 @@ int readDingConfig(ding_config_info_t *cnf);
  */
 
 int writeDingConfig(ding_config_info_t *cnf);
+
+/**
+ * @brief read the chime configuration.
+ * @param name is the  chime_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+*/
+int readChimeConfig(chime_config_info_t *cnf);
+
+/**
+ * @brief write the chime configuration.
+ * @param name is the chime_config_info_t.
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+
+int writeChimeConfig(chime_config_info_t *cnf);
 
 /**
  * @brief read the sensor configuration.
