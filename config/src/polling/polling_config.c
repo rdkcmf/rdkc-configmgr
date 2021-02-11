@@ -140,6 +140,13 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
                 if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
                 if(strcmp(Wcrf->quite_interval, Rcrf->quite_interval)) return RDKC_SUCCESS;
         }
+        else if(!strcmp(CHIME_CONFIG_FILE, configFile))
+        {
+                chime_config_info_t *Wcrf = (chime_config_info_t *)WcrfIn;
+                chime_config_info_t *Rcrf = (chime_config_info_t *)RcrfIn;
+                if(strcmp(Wcrf->enable, Rcrf->enable)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->chime_type, Rcrf->chime_type)) return RDKC_SUCCESS;
+        }
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
 		kvs_provision_info_t *Wcrf = (kvs_provision_info_t*)WcrfIn;
@@ -665,6 +672,89 @@ int writeDingConfig(ding_config_info_t *crf)
         fsync(fileno(writeFile));
         fclose(writeFile);
         rename(DING_CONFIG_FILE".new",DING_CONFIG_FILE);
+        return RDKC_SUCCESS;
+}
+
+/**
+ * @brief read the  chime configuration.
+ * @param name is the  chime_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int readChimeConfig(chime_config_info_t *crf)
+{
+        FILE *readFile;
+        int retVal = RDKC_FAILURE;
+
+        if(crf == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+
+        readFile = fopen(CHIME_CONFIG_FILE, "r");
+        if(readFile == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+
+        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = readValues(readFile, XH_ATTR_CHIME_TYPE, crf->chime_type);
+
+        fclose(readFile);
+        return retVal;
+}
+
+/**
+ * @brief write the chime configuration.
+ * @param name is the chime_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int writeChimeConfig(chime_config_info_t *crf)
+{
+        FILE *writeFile;
+        char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
+        int retVal = RDKC_FAILURE;
+        chime_config_info_t *Rcrf;
+        if(crf == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+        Rcrf = (chime_config_info_t*)malloc (sizeof(chime_config_info_t));
+        retVal = readChimeConfig(Rcrf);
+        if(retVal == RDKC_SUCCESS)
+        {
+                /* Check if data to be set is already set, if yes, return error */
+                retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)CHIME_CONFIG_FILE);
+                if(retVal == RDKC_FAILURE)
+                {
+                        if(Rcrf) {
+                                free(Rcrf);
+                                Rcrf = NULL;
+                        }
+                        return RDKC_ERR_DATA_ALREADY_SET;
+                }
+        }
+        writeFile = fopen(CHIME_CONFIG_FILE".new", "w");
+        if(writeFile == NULL)
+        {
+                if(Rcrf) {
+                        free(Rcrf);
+                        Rcrf = NULL;
+                }
+                return RDKC_FAILURE;
+        }
+        sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_CHIME_TYPE, crf->chime_type);
+        fputs((const char *) buffer, writeFile);
+        if(Rcrf) {
+                free(Rcrf);
+                Rcrf = NULL;
+        }
+        fflush(writeFile);
+        fsync(fileno(writeFile));
+        fclose(writeFile);
+        rename(CHIME_CONFIG_FILE".new",CHIME_CONFIG_FILE);
         return RDKC_SUCCESS;
 }
 
@@ -1596,7 +1686,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
 		}
                 return RDKC_ERR_DATA_ALREADY_SET;
         }
-#ifdef XCAM2
+#if defined ( XCAM2 ) || defined ( XHB1 )
         //Set Username and Password in system.conf
         retVal = PRO_SetStr(SEC_USER, USER_ADMIN_NAME, crf->user_name, SYSTEM_CONF);
         if (retVal != 0)

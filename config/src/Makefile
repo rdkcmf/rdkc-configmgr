@@ -38,7 +38,7 @@ ifeq ($(XCAM_MODEL), SCHC2)
 CFLAGS  += -DXCAM2
 endif
 ifeq ($(XCAM_MODEL), XHB1)
-CFLAGS  += -DOSI
+CFLAGS  += -DXHB1
 endif
 RM = rm -f
 TARGET_LIB = libconfigmanager.so
