@@ -81,6 +81,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->quite_interval, Rcrf->quite_interval)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->roi_coord, Rcrf->roi_coord)) return RDKC_SUCCESS;
 	}
 	else if(!strcmp(EMS_CONFIG_FILE, configFile))
 	{
@@ -503,6 +504,7 @@ int readEventConfig(events_provision_info_t *crf)
 	retVal = readValues(readFile, XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
 	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = readValues(readFile, XH_ATTR_ROICOORD, crf->roi_coord);
 
 	fclose(readFile);
 	return retVal;
@@ -568,6 +570,9 @@ int writeEventConfig(events_provision_info_t *crf)
 	fputs((const char *) buffer, writeFile);
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	fputs((const char *) buffer, writeFile);
+
+	sprintf(buffer, "%s=%s\n", XH_ATTR_ROICOORD, crf->roi_coord);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {

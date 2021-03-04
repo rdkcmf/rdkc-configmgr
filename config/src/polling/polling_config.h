@@ -156,6 +156,7 @@ extern "C"
 #ifdef  _SUPPORT_AAC_
 #define XH_ATTR_AUDIO                      "audio"
 #endif
+#define XH_ATTR_ROICOORD                   "roi"
 
 typedef struct {
 	char enable[CONFIG_ATTR_MAX];
@@ -270,6 +271,7 @@ typedef struct {
     char quite_interval[CONFIG_ATTR_MAX];
     char url[CONFIG_STRING_MAX];
     char auth_token[AUTH_TOKEN_MAX];
+    char roi_coord[CONFIG_STRING_MAX];
 } events_provision_info_t;
 
 typedef struct {

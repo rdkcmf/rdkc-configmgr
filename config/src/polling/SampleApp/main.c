@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
    strcpy(Wevents->quite_interval, "30 Secs");
    strcpy(Wevents->url, "http://eventsurl.com");
    strcpy(Wevents->auth_token, "events_token===");
+   strcpy(Wevents->roi_coord, "[[0.0-0.0][0.0-0.5][0.0-1.0][1.0-1.0][1.0-0.5][1.0-0.0][0.0-0.0]]");
 
    retVal = writeEventConfig(Wevents);
    printf("First Write retVal=%d  ", retVal);
@@ -90,9 +91,9 @@ int main(int argc, char* argv[])
 
    Revents = (events_provision_info_t*)malloc (sizeof(events_provision_info_t));
    retVal = readEventConfig(Revents);
-   printf("\n************EventProvisionConfig**************\n motion_enable=%s human_enable=%s tamper_enable=%s quite_interval=%s url=%s auth_token=%s\n",    \
+   printf("\n************EventProvisionConfig**************\n motion_enable=%s human_enable=%s tamper_enable=%s quite_interval=%s url=%s auth_token=%s roi_coord=%s\n",    \
           Revents->motion_enable, Revents->human_enable, Revents->tamper_enable,  \
-		  Revents->quite_interval, Revents->url, Revents->auth_token);
+		  Revents->quite_interval, Revents->url, Revents->auth_token, Revents->roi_coord);
    printf("************EventProvisionConfig**************\n\n");
 
 /********** EMS PROVISIION ***********/
@@ -204,3 +205,4 @@ int main(int argc, char* argv[])
    printf("************End of Polling Config***************\n");
    return RDKC_SUCCESS;
 }
+
