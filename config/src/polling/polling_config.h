@@ -203,6 +203,7 @@ typedef struct {
     char cert_CA_auth[AUTH_TOKEN_MAX];
     char cert_CA_id[AUTH_TOKEN_MAX];
     char cert_CA_force[CONFIG_ATTR_MAX];
+    char partner_id[CONFIG_ATTR_MAX];
 } kvs_provision_info_t;
 
 typedef struct {
