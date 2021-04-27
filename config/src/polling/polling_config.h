@@ -151,6 +151,7 @@ extern "C"
 #define XH_ATTR_WIDTH                      "width"
 #define XH_ATTR_QUALITY                    "quality"
 #define XH_ATTR_CHIME_TYPE                 "chime_type"
+#define XH_ATTR_CHIME_DURATION             "duration"
 #define _SUPPORT_AAC_
 #ifdef  _SUPPORT_AAC_
 #define XH_ATTR_AUDIO                      "audio"
@@ -258,6 +259,7 @@ typedef struct {
 typedef struct {
     char enable[CONFIG_ATTR_MAX];
     char chime_type[CONFIG_STRING_MAX];
+    char duration[CONFIG_ATTR_MAX];
 } chime_config_info_t;
 
 typedef struct {

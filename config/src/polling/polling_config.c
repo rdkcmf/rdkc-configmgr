@@ -146,6 +146,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
                 chime_config_info_t *Rcrf = (chime_config_info_t *)RcrfIn;
                 if(strcmp(Wcrf->enable, Rcrf->enable)) return RDKC_SUCCESS;
                 if(strcmp(Wcrf->chime_type, Rcrf->chime_type)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->duration, Rcrf->duration)) return RDKC_SUCCESS;
         }
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
@@ -698,6 +699,7 @@ int readChimeConfig(chime_config_info_t *crf)
 
         retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
         retVal = readValues(readFile, XH_ATTR_CHIME_TYPE, crf->chime_type);
+        retVal = readValues(readFile, XH_ATTR_CHIME_DURATION, crf->duration);
 
         fclose(readFile);
         return retVal;
@@ -746,6 +748,8 @@ int writeChimeConfig(chime_config_info_t *crf)
         sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
         fputs((const char *) buffer, writeFile);
         sprintf(buffer, "%s=%s\n", XH_ATTR_CHIME_TYPE, crf->chime_type);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_CHIME_DURATION, crf->duration);
         fputs((const char *) buffer, writeFile);
         if(Rcrf) {
                 free(Rcrf);
