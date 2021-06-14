@@ -22,9 +22,7 @@
   <components>
     <configMgr>
      <dependencies>sdk,utility,libsyswrapper</dependencies>
-
      <is_coverity_supported>True</is_coverity_supported>
-
     </configMgr>
    </components>
 </environment>
