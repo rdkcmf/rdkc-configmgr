@@ -34,7 +34,7 @@ int sendsignaltoprocess(const char* processname,int signalname)
 	}
 
 	fscanf(inFp,"%d",&pid);
-	pclose(inFp);
+	v_secure_pclose(inFp);
 	if (pid > 0) {
 		kill(pid, signalname);
 	} else {
