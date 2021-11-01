@@ -149,6 +149,17 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
                 if(strcmp(Wcrf->chime_type, Rcrf->chime_type)) return RDKC_SUCCESS;
                 if(strcmp(Wcrf->duration, Rcrf->duration)) return RDKC_SUCCESS;
         }
+        else if(!strcmp(DOI_CONFIG_FILE, configFile))
+        {
+                doi_config_info_t *Wcrf = (doi_config_info_t *)WcrfIn;
+                doi_config_info_t *Rcrf = (doi_config_info_t *)RcrfIn;
+                if(strcmp(Wcrf->enable, Rcrf->enable)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->updated, Rcrf->updated)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->auth, Rcrf->auth)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->threshold, Rcrf->threshold)) return RDKC_SUCCESS;
+                if(strcmp(Wcrf->timestamp, Rcrf->timestamp)) return RDKC_SUCCESS;
+        }
 	else if(!strcmp(KVS_CONFIG_FILE, configFile))
 	{
 		kvs_provision_info_t *Wcrf = (kvs_provision_info_t*)WcrfIn;
@@ -764,6 +775,101 @@ int writeChimeConfig(chime_config_info_t *crf)
         fsync(fileno(writeFile));
         fclose(writeFile);
         rename(CHIME_CONFIG_FILE".new",CHIME_CONFIG_FILE);
+        return RDKC_SUCCESS;
+}
+/**
+ * @brief read the  doi configuration.
+ * @param name is the  doi_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int readDOIConfig(doi_config_info_t *crf)
+{       
+        FILE *readFile;
+        int retVal = RDKC_SUCCESS;
+        
+        if(crf == NULL)
+        {       
+                return RDKC_FAILURE;
+        }
+        
+        readFile = fopen(DOI_CONFIG_FILE, "r");
+        if(readFile == NULL)
+        {       
+                return RDKC_FAILURE;
+        }
+        
+        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = readValues(readFile, XH_ATTR_DOI_CONFIG_UPDATED, crf->updated);
+        retVal = readValues(readFile, XH_ATTR_URL, crf->url);
+        retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth);
+        retVal = readValues(readFile, XH_ATTR_THRESHOLD, crf->threshold);
+        retVal = readValues(readFile, XH_ATTR_DOI_TIMESTAMP, crf->timestamp);
+        
+        fclose(readFile);
+        return retVal;
+}
+
+/**
+ * @brief write the chime configuration.
+ * @param name is the chime_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int writeDOIConfig(doi_config_info_t *crf)
+{
+        FILE *writeFile;
+        char buffer[DATA_LEN];
+        memset(buffer, 0, sizeof(DATA_LEN));
+        int retVal = RDKC_FAILURE;
+        chime_config_info_t *Rcrf;
+        if(crf == NULL)
+        {
+                return RDKC_FAILURE;
+        }
+        Rcrf = (doi_config_info_t*)malloc (sizeof(doi_config_info_t));
+        retVal = readDOIConfig(Rcrf);
+        if(retVal == RDKC_SUCCESS)
+        {
+                /* Check if data to be set is already set, if yes, return error */
+                retVal = checkRepeatedValues((void*)crf, (void*)Rcrf, (char*)DOI_CONFIG_FILE);
+                if(retVal == RDKC_FAILURE)
+                {
+                        if(Rcrf) {
+                                free(Rcrf);
+                                Rcrf = NULL;
+                        }
+                        return RDKC_ERR_DATA_ALREADY_SET;
+                }
+        }
+        writeFile = fopen(DOI_CONFIG_FILE".new", "w");
+        if(writeFile == NULL)
+        {
+                if(Rcrf) {
+                        free(Rcrf);
+                        Rcrf = NULL;
+                }
+                return RDKC_FAILURE;
+        }
+        sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_DOI_CONFIG_UPDATED, crf->updated);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_THRESHOLD, crf->threshold);
+        fputs((const char *) buffer, writeFile);
+        sprintf(buffer, "%s=%s\n", XH_ATTR_DOI_TIMESTAMP, crf->timestamp);
+        fputs((const char *) buffer, writeFile);
+
+        if(Rcrf) {
+                free(Rcrf);
+                Rcrf = NULL;
+        }
+        fflush(writeFile);
+        fsync(fileno(writeFile));
+        fclose(writeFile);
+        rename(DOI_CONFIG_FILE".new",DOI_CONFIG_FILE);
         return RDKC_SUCCESS;
 }
 

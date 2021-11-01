@@ -54,6 +54,9 @@ extern "C"
 #define SENSOR_CONFIG_FILE "/opt/usr_config/sensor.conf"
 #define DING_CONFIG_FILE "/opt/usr_config/ding.conf"
 #define CHIME_CONFIG_FILE "/opt/usr_config/chime.conf"
+#define DOI_CONFIG_FILE "/opt/usr_config/doi.conf"
+#define DOI_BITMAP_FNAME "/opt/usr_config/doi_bitmap"
+#define DOI_BITMAPWRITE_FNAME "/opt/usr_config/doi_bitmap.new"
 #define MAX_ERROR_COUNT				5
 #define PARAM_LEN				128
 #define URL_LEN					1024
@@ -152,6 +155,9 @@ extern "C"
 #define XH_ATTR_QUALITY                    "quality"
 #define XH_ATTR_CHIME_TYPE                 "chime_type"
 #define XH_ATTR_CHIME_DURATION             "duration"
+#define XH_ATTR_DOI_CONFIG_UPDATED	   "updated"
+#define XH_ATTR_DOI_TIMESTAMP              "timestamp"
+#define XH_ATTR_THRESHOLD	   	   "threshold"
 #define _SUPPORT_AAC_
 #ifdef  _SUPPORT_AAC_
 #define XH_ATTR_AUDIO                      "audio"
@@ -263,6 +269,15 @@ typedef struct {
     char chime_type[CONFIG_STRING_MAX];
     char duration[CONFIG_ATTR_MAX];
 } chime_config_info_t;
+
+typedef struct {
+    char enable[CONFIG_ATTR_MAX];
+    char updated[CONFIG_STRING_MAX];
+    char url[CONFIG_STRING_MAX];
+    char auth[AUTH_TOKEN_MAX];
+    char threshold[CONFIG_ATTR_MAX];
+    char timestamp[CONFIG_ATTR_MAX];
+}doi_config_info_t;
 
 typedef struct {
     char motion_enable[CONFIG_ATTR_MAX];
@@ -488,6 +503,19 @@ int writeUserCredentialInfo(usr_creds_info_t *crf);
  * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
  */
 int readUserCredentialInfo(usr_creds_info_t *crf);
+
+/**
+ * @brief store the doi config.
+ * @param name is doi_config_info_t
+ * @return RDKC_UPDATED if there is an UPDATE in configuration,RDKC_SUCCESS on success otherwise RDKC_FAILURE on failure.
+ */
+int writeDOIConfig(doi_config_info_t *crf);
+/**
+ * @brief Get the DOI info.
+ * @param name is doi_config_info_t.
+ * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
+ */
+int readDOIConfig(doi_config_info_t *crf);
 
 int polling_config_init();
 int polling_config_exit();
