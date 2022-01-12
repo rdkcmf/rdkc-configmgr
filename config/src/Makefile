@@ -40,6 +40,9 @@ endif
 ifeq ($(XCAM_MODEL), XHB1)
 CFLAGS  += -DXHB1
 endif
+ifeq ($(XCAM_MODEL), XHC3)
+CFLAGS  += -DXHC3
+endif
 RM = rm -f
 TARGET_LIB = libconfigmanager.so
 SRCS = rdkc_mutex_handle.c rdkc_config_params.c polling/polling_config.c

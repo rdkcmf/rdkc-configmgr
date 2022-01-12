@@ -1695,7 +1695,7 @@ int writeUserCredentialInfo(usr_creds_info_t *crf)
 		}
                 return RDKC_ERR_DATA_ALREADY_SET;
         }
-#if defined ( XCAM2 ) || defined ( XHB1 )
+#if defined ( XCAM2 ) || defined ( XHB1 ) || defined ( XHC3 )
         //Set Username and Password in system.conf
         retVal = PRO_SetStr(SEC_USER, USER_ADMIN_NAME, crf->user_name, SYSTEM_CONF);
         if (retVal != 0)
