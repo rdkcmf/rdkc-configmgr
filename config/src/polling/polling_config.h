@@ -163,6 +163,7 @@ extern "C"
 #define XH_ATTR_AUDIO                      "audio"
 #endif
 #define XH_ATTR_ROICOORD                   "roi"
+#define XH_ATTR_TZ                         "timeZone"
 
 typedef struct {
 	char enable[CONFIG_ATTR_MAX];
@@ -303,6 +304,7 @@ typedef struct {
     char url[CONFIG_STRING_MAX];
     char auth_token[AUTH_TOKEN_MAX];
     char interval[CONFIG_ATTR_MAX];
+    char timeZone[CONFIG_ATTR_MAX];
 } _config_t;
 
 

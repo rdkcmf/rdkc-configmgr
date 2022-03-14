@@ -44,6 +44,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
 		if(strcmp(Wcrf->url, Rcrf->url)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->auth_token, Rcrf->auth_token)) return RDKC_SUCCESS;
 		if(strcmp(Wcrf->interval, Rcrf->interval)) return RDKC_SUCCESS;
+		if(strcmp(Wcrf->timeZone, Rcrf->timeZone)) return RDKC_SUCCESS;
 	}
 	else if(!strcmp(CLOUDRECORDER_CONFIG_FILE, configFile))
 	{
@@ -258,6 +259,7 @@ int readPollingConfig(_config_t *crf)
 	retVal = readValues(readFile, XH_ATTR_INTERVAL, crf->interval);
 	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
 	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = readValues(readFile, XH_ATTR_TZ, crf->timeZone);
 
 	fclose(readFile);
 	return retVal;
@@ -275,7 +277,6 @@ int writePollingConfig(_config_t *crf)
         memset(buffer, 0, sizeof(DATA_LEN));
 	int retVal = RDKC_FAILURE;
 	_config_t *Rcrf = NULL;
-
 	if(crf == NULL)
 	{
 		return RDKC_FAILURE;
@@ -314,6 +315,9 @@ int writePollingConfig(_config_t *crf)
 	fputs((const char *) buffer, writeFile);
 
 	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	fputs((const char *) buffer, writeFile);
+
+	snprintf(buffer, DATA_LEN,"%s=%s\n", XH_ATTR_TZ, crf->timeZone);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
