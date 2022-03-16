@@ -27,7 +27,7 @@
 #include "RFCCommon.h"
 
 static int polling_inited = FALSE;
-int readValues(FILE *pFile, char *pToken, char *data);
+int ConfigReadValues(FILE *pFile, char *pToken, char *data);
 int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile);
 
 /**
@@ -202,7 +202,7 @@ int checkRepeatedValues(void *WcrfIn, void *RcrfIn, char *configFile)
  * @param name is the cvr_provision_info_t
  * @return RDKC_SUCCESS on success,otherwise RDKC_FAILURE on failure.
  */
-int readValues(FILE *pFile, char *pToken, char *data)
+int ConfigReadValues(FILE *pFile, char *pToken, char *data)
 {
 	char buffer[DATA_LEN];
 	memset(buffer, 0, sizeof(DATA_LEN));
@@ -256,10 +256,10 @@ int readPollingConfig(_config_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_INTERVAL, crf->interval);
-	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
-	retVal = readValues(readFile, XH_ATTR_TZ, crf->timeZone);
+	retVal = ConfigReadValues(readFile, XH_ATTR_INTERVAL, crf->interval);
+	retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = ConfigReadValues(readFile, XH_ATTR_TZ, crf->timeZone);
 
 	fclose(readFile);
 	return retVal;
@@ -351,19 +351,19 @@ int readCloudRecorderConfig(cvr_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
-	retVal = readValues(readFile, XH_ATTR_AUDIO, crf->audio_enable);
-	retVal = readValues(readFile, XH_ATTR_FORMAT, crf->cvr_segment_info.format);
-	retVal = readValues(readFile, XH_ATTR_DURATION, crf->cvr_segment_info.duration);
-	retVal = readValues(readFile, XH_ATTR_MIN, crf->cvr_segment_info.cvr_lbr_info.min);
-	retVal = readValues(readFile, XH_ATTR_MAX, crf->cvr_segment_info.cvr_lbr_info.max);
-	retVal = readValues(readFile, XH_ATTR_MED, crf->cvr_segment_info.cvr_lbr_info.med);
-	retVal = readValues(readFile, XH_ATTR_LOW, crf->cvr_segment_info.cvr_lbr_info.low);
-	retVal = readValues(readFile, XH_ATTR_RESOLUTION, crf->cvr_segment_info.cvr_stream_info.resolution);
-	retVal = readValues(readFile, XH_ATTR_FPS, crf->cvr_segment_info.cvr_stream_info.fps);
-	retVal = readValues(readFile, XH_ATTR_GOP, crf->cvr_segment_info.cvr_stream_info.gop);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUDIO, crf->audio_enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_FORMAT, crf->cvr_segment_info.format);
+	retVal = ConfigReadValues(readFile, XH_ATTR_DURATION, crf->cvr_segment_info.duration);
+	retVal = ConfigReadValues(readFile, XH_ATTR_MIN, crf->cvr_segment_info.cvr_lbr_info.min);
+	retVal = ConfigReadValues(readFile, XH_ATTR_MAX, crf->cvr_segment_info.cvr_lbr_info.max);
+	retVal = ConfigReadValues(readFile, XH_ATTR_MED, crf->cvr_segment_info.cvr_lbr_info.med);
+	retVal = ConfigReadValues(readFile, XH_ATTR_LOW, crf->cvr_segment_info.cvr_lbr_info.low);
+	retVal = ConfigReadValues(readFile, XH_ATTR_RESOLUTION, crf->cvr_segment_info.cvr_stream_info.resolution);
+	retVal = ConfigReadValues(readFile, XH_ATTR_FPS, crf->cvr_segment_info.cvr_stream_info.fps);
+	retVal = ConfigReadValues(readFile, XH_ATTR_GOP, crf->cvr_segment_info.cvr_stream_info.gop);
 
 	fclose(readFile);
 	return retVal;
@@ -513,13 +513,13 @@ int readEventConfig(events_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_TAG_NAME_MOTION, crf->motion_enable);
-	retVal = readValues(readFile, XH_TAG_NAME_HUMAN, crf->human_enable);
-	retVal = readValues(readFile, XH_TAG_NAME_TAMPER, crf->tamper_enable);
-	retVal = readValues(readFile, XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
-	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
-	retVal = readValues(readFile, XH_ATTR_ROICOORD, crf->roi_coord);
+	retVal = ConfigReadValues(readFile, XH_TAG_NAME_MOTION, crf->motion_enable);
+	retVal = ConfigReadValues(readFile, XH_TAG_NAME_HUMAN, crf->human_enable);
+	retVal = ConfigReadValues(readFile, XH_TAG_NAME_TAMPER, crf->tamper_enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
+	retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ROICOORD, crf->roi_coord);
 
 	fclose(readFile);
 	return retVal;
@@ -621,10 +621,10 @@ int readDingConfig(ding_config_info_t *crf)
                 return RDKC_FAILURE;
         }
         
-        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-        retVal = readValues(readFile, XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
-        retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-        retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+        retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = ConfigReadValues(readFile, XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
+        retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+        retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
         
         fclose(readFile);
         return retVal;
@@ -717,9 +717,9 @@ int readChimeConfig(chime_config_info_t *crf)
                 return RDKC_FAILURE;
         }
 
-        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-        retVal = readValues(readFile, XH_ATTR_CHIME_TYPE, crf->chime_type);
-        retVal = readValues(readFile, XH_ATTR_CHIME_DURATION, crf->duration);
+        retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = ConfigReadValues(readFile, XH_ATTR_CHIME_TYPE, crf->chime_type);
+        retVal = ConfigReadValues(readFile, XH_ATTR_CHIME_DURATION, crf->duration);
 
         fclose(readFile);
         return retVal;
@@ -802,12 +802,12 @@ int readDOIConfig(doi_config_info_t *crf)
                 return RDKC_FAILURE;
         }
         
-        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-        retVal = readValues(readFile, XH_ATTR_DOI_CONFIG_UPDATED, crf->updated);
-        retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-        retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth);
-        retVal = readValues(readFile, XH_ATTR_THRESHOLD, crf->threshold);
-        retVal = readValues(readFile, XH_ATTR_DOI_TIMESTAMP, crf->timestamp);
+        retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = ConfigReadValues(readFile, XH_ATTR_DOI_CONFIG_UPDATED, crf->updated);
+        retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+        retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth);
+        retVal = ConfigReadValues(readFile, XH_ATTR_THRESHOLD, crf->threshold);
+        retVal = ConfigReadValues(readFile, XH_ATTR_DOI_TIMESTAMP, crf->timestamp);
         
         fclose(readFile);
         return retVal;
@@ -897,9 +897,9 @@ int readDetectionConfig(detection_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->motion_enable);
-	retVal = readValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
-	retVal = readValues(readFile, XH_ATTR_ENV, crf->env);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->motion_enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ENV, crf->env);
 
 	fclose(readFile);
 	return retVal;
@@ -989,11 +989,11 @@ int readSensorConfig(sensor_config_info_t *crf)
                 return RDKC_FAILURE;
         }
 
-        retVal = readValues(readFile, XH_ATTR_HDR, crf->hdr);
-        retVal = readValues(readFile, XH_ATTR_DAY2NIGHT, crf->day2night);
-        retVal = readValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
-        retVal = readValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
-        retVal = readValues(readFile, XH_ATTR_ENV, crf->env);
+        retVal = ConfigReadValues(readFile, XH_ATTR_HDR, crf->hdr);
+        retVal = ConfigReadValues(readFile, XH_ATTR_DAY2NIGHT, crf->day2night);
+        retVal = ConfigReadValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
+        retVal = ConfigReadValues(readFile, XH_ATTR_SENSITIVITY, crf->sensitivity);
+        retVal = ConfigReadValues(readFile, XH_ATTR_ENV, crf->env);
 
         fclose(readFile);
         return retVal;
@@ -1094,12 +1094,12 @@ int readEMSConfig(ems_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-	retVal = readValues(readFile, XH_ATTR_ROOMID, crf->roomId);
-	retVal = readValues(readFile, XH_ATTR_URL, crf->ers_url);
-	retVal = readValues(readFile, XH_ATTR_ERSPORT, crf->ers_port);
-	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
-        retVal = readValues(readFile, XH_ATTR_RESOLUTION, crf->resolution);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ROOMID, crf->roomId);
+	retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->ers_url);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ERSPORT, crf->ers_port);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+        retVal = ConfigReadValues(readFile, XH_ATTR_RESOLUTION, crf->resolution);
 
 	fclose(readFile);
 	return retVal;
@@ -1196,9 +1196,9 @@ int readLiveCacheConfig(livecache_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
 	fclose(readFile);
 	return retVal;
@@ -1288,12 +1288,12 @@ int readTNConfig(tn_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-	retVal = readValues(readFile, XH_ATTR_HEIGHT, crf->height);
-	retVal = readValues(readFile, XH_ATTR_WIDTH, crf->width);
-	retVal = readValues(readFile, XH_ATTR_QUALITY, crf->quality);
-	retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-	retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+	retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+	retVal = ConfigReadValues(readFile, XH_ATTR_HEIGHT, crf->height);
+	retVal = ConfigReadValues(readFile, XH_ATTR_WIDTH, crf->width);
+	retVal = ConfigReadValues(readFile, XH_ATTR_QUALITY, crf->quality);
+	retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+	retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
 	fclose(readFile);
 	return retVal;
@@ -1395,11 +1395,11 @@ int readCVRStatsConfig(cvrStats_provision_info_t *crf)
         return RDKC_FAILURE;
     }
 
-    retVal = readValues(readFile, XH_ATTR_INTERVAL, crf->interval);
-    retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enabled);
-    retVal = readValues(readFile, XH_FAILURE_PRECENT, crf->failurePercent);
-    retVal = readValues(readFile, XH_ATTR_URL, crf->url);
-    retVal = readValues(readFile, XH_ATTR_AUTH, crf->auth_token);
+    retVal = ConfigReadValues(readFile, XH_ATTR_INTERVAL, crf->interval);
+    retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enabled);
+    retVal = ConfigReadValues(readFile, XH_FAILURE_PRECENT, crf->failurePercent);
+    retVal = ConfigReadValues(readFile, XH_ATTR_URL, crf->url);
+    retVal = ConfigReadValues(readFile, XH_ATTR_AUTH, crf->auth_token);
 
     fclose(readFile);
     readFile=NULL;
@@ -1497,34 +1497,34 @@ int readKVSConfig(kvs_provision_info_t *crf)
 	/* Update the config file here */
 	char tmp_buff[DATA_LEN] = {'\0'};
 
-        retVal = readValues(readFile, XH_ATTR_ENABLED, crf->enable);
-        retVal = readValues(readFile, XH_ATTR_ROLE_ALIAS, crf->role_alias);
-	retVal = readValues(readFile, XH_ATTR_CRED_PROVIDER, crf->credentialProvider);
-        retVal = readValues(readFile, XH_ATTR_STREAM_NAME, crf->stream_name);
-        retVal = readValues(readFile, XH_ATTR_FORCE_CSR_REQ, crf->force_CSR_req);
+        retVal = ConfigReadValues(readFile, XH_ATTR_ENABLED, crf->enable);
+        retVal = ConfigReadValues(readFile, XH_ATTR_ROLE_ALIAS, crf->role_alias);
+	retVal = ConfigReadValues(readFile, XH_ATTR_CRED_PROVIDER, crf->credentialProvider);
+        retVal = ConfigReadValues(readFile, XH_ATTR_STREAM_NAME, crf->stream_name);
+        retVal = ConfigReadValues(readFile, XH_ATTR_FORCE_CSR_REQ, crf->force_CSR_req);
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_ENABLED);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CSR_enable);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CSR_enable);
 	memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_URL);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CSR_url);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CSR_url);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_AUTH);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CSR_auth);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CSR_auth);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_ENABLED);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CA_enable);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_enable);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_URL);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CA_url);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_url);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_AUTH);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CA_auth);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_auth);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_ID);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CA_id);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_id);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA);
-        retVal = readValues(readFile, tmp_buff, crf->cert_CA_force);
+        retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_force);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 
 	fclose(readFile);
@@ -1659,8 +1659,8 @@ int readLUXConfig(lux_threshold_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	retVal = readValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
-	retVal = readValues(readFile, XH_ATTR_DAY2NIGHT, crf->day2night);
+	retVal = ConfigReadValues(readFile, XH_ATTR_NIGHT2DAY, crf->night2day);
+	retVal = ConfigReadValues(readFile, XH_ATTR_DAY2NIGHT, crf->day2night);
 
 	fclose(readFile);
 	return retVal;
@@ -1749,8 +1749,8 @@ int readUserCredentialInfo(usr_creds_info_t *crf)
                 return RDKC_FAILURE;
         }
 
-        retVal = readValues(readFile, XH_ATTR_USER_NAME, crf->user_name);
-        retVal = readValues(readFile, XH_ATTR_PASSWORD, crf->password);
+        retVal = ConfigReadValues(readFile, XH_ATTR_USER_NAME, crf->user_name);
+        retVal = ConfigReadValues(readFile, XH_ATTR_PASSWORD, crf->password);
 
         fclose(readFile);
         return retVal;
