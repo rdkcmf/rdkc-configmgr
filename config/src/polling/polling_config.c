@@ -308,13 +308,13 @@ int writePollingConfig(_config_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
+	snprintf(buffer, DATA_LEN,"%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+	snprintf(buffer, DATA_LEN,"%s=%s\n", XH_ATTR_URL, crf->url);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	snprintf(buffer, DATA_LEN,"%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
 	snprintf(buffer, DATA_LEN,"%s=%s\n", XH_ATTR_TZ, crf->timeZone);
@@ -327,7 +327,10 @@ int writePollingConfig(_config_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(POLLING_CONFIG_FILE".new",POLLING_CONFIG_FILE);
+        if( rename(POLLING_CONFIG_FILE".new",POLLING_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 
@@ -432,44 +435,44 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
 		abrBitrateChanged = true;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->url);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUDIO, crf->audio_enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUDIO, crf->audio_enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_FORMAT, crf->cvr_segment_info.format);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_FORMAT, crf->cvr_segment_info.format);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_DURATION, crf->cvr_segment_info.duration);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_DURATION, crf->cvr_segment_info.duration);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_MIN, crf->cvr_segment_info.cvr_lbr_info.min);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_MIN, crf->cvr_segment_info.cvr_lbr_info.min);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_MAX, crf->cvr_segment_info.cvr_lbr_info.max);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_MAX, crf->cvr_segment_info.cvr_lbr_info.max);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_MED, crf->cvr_segment_info.cvr_lbr_info.med);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_MED, crf->cvr_segment_info.cvr_lbr_info.med);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_LOW, crf->cvr_segment_info.cvr_lbr_info.low);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_LOW, crf->cvr_segment_info.cvr_lbr_info.low);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_RESOLUTION, crf->cvr_segment_info.cvr_stream_info.resolution);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_RESOLUTION, crf->cvr_segment_info.cvr_stream_info.resolution);
 	fputs((const char *) buffer, writeFile);
 
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_FPS, crf->cvr_segment_info.cvr_stream_info.fps);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_FPS, crf->cvr_segment_info.cvr_stream_info.fps);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_GOP, crf->cvr_segment_info.cvr_stream_info.gop);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_GOP, crf->cvr_segment_info.cvr_stream_info.gop);
 	fputs((const char *) buffer, writeFile);
 
 #if defined (SOC_JSON_CONFIG_ENABLE)
@@ -488,7 +491,10 @@ int writeCloudRecorderConfig(cvr_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(CLOUDRECORDER_CONFIG_FILE".new",CLOUDRECORDER_CONFIG_FILE);
+        if( rename(CLOUDRECORDER_CONFIG_FILE".new",CLOUDRECORDER_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 
@@ -569,25 +575,25 @@ int writeEventConfig(events_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_TAG_NAME_MOTION, crf->motion_enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_TAG_NAME_MOTION, crf->motion_enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_TAG_NAME_HUMAN, crf->human_enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_TAG_NAME_HUMAN, crf->human_enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_TAG_NAME_TAMPER, crf->tamper_enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_TAG_NAME_TAMPER, crf->tamper_enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->url);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ROICOORD, crf->roi_coord);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ROICOORD, crf->roi_coord);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
@@ -597,7 +603,10 @@ int writeEventConfig(events_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(EVENTS_CONFIG_FILE".new",EVENTS_CONFIG_FILE);
+        if( rename(EVENTS_CONFIG_FILE".new",EVENTS_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 /**
@@ -673,16 +682,16 @@ int writeDingConfig(ding_config_info_t *crf)
                 return RDKC_FAILURE;
         }
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
         fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_QUIET_INTERVAL, crf->quite_interval);
         fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->url);
         fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
         fputs((const char *) buffer, writeFile);
 
         if(Rcrf) {
@@ -692,7 +701,10 @@ int writeDingConfig(ding_config_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
         fclose(writeFile);
-        rename(DING_CONFIG_FILE".new",DING_CONFIG_FILE);
+        if( rename(DING_CONFIG_FILE".new",DING_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
         return RDKC_SUCCESS;
 }
 
@@ -765,11 +777,11 @@ int writeChimeConfig(chime_config_info_t *crf)
                 }
                 return RDKC_FAILURE;
         }
-        sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
         fputs((const char *) buffer, writeFile);
-        sprintf(buffer, "%s=%s\n", XH_ATTR_CHIME_TYPE, crf->chime_type);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_CHIME_TYPE, crf->chime_type);
         fputs((const char *) buffer, writeFile);
-        sprintf(buffer, "%s=%s\n", XH_ATTR_CHIME_DURATION, crf->duration);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_CHIME_DURATION, crf->duration);
         fputs((const char *) buffer, writeFile);
         if(Rcrf) {
                 free(Rcrf);
@@ -778,7 +790,10 @@ int writeChimeConfig(chime_config_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
         fclose(writeFile);
-        rename(CHIME_CONFIG_FILE".new",CHIME_CONFIG_FILE);
+        if( rename(CHIME_CONFIG_FILE".new",CHIME_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
         return RDKC_SUCCESS;
 }
 /**
@@ -949,13 +964,13 @@ int writeDetectionConfig(detection_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->motion_enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->motion_enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_SENSITIVITY, crf->sensitivity);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_SENSITIVITY, crf->sensitivity);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ENV, crf->env);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENV, crf->env);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
@@ -965,7 +980,10 @@ int writeDetectionConfig(detection_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(DETECTION_CONFIG_FILE".new",DETECTION_CONFIG_FILE);
+        if( rename(DETECTION_CONFIG_FILE".new",DETECTION_CONFIG_FILE)  < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 /**
@@ -1045,19 +1063,19 @@ int writeSensorConfig(sensor_config_info_t *crf)
                 return RDKC_FAILURE;
         }
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_HDR, crf->hdr);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_HDR, crf->hdr);
         fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_SENSITIVITY, crf->sensitivity);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_SENSITIVITY, crf->sensitivity);
         fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_ENV, crf->env);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENV, crf->env);
         fputs((const char *) buffer, writeFile);
 	
-	sprintf(buffer, "%s=%s\n", XH_ATTR_NIGHT2DAY, crf->night2day);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_NIGHT2DAY, crf->night2day);
         fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
         fputs((const char *) buffer, writeFile);
 
         if(Rcrf) {
@@ -1068,7 +1086,10 @@ int writeSensorConfig(sensor_config_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
         fclose(writeFile);
-        rename(SENSOR_CONFIG_FILE".new",SENSOR_CONFIG_FILE);
+        if( rename(SENSOR_CONFIG_FILE".new",SENSOR_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
         return RDKC_SUCCESS;
 
 }
@@ -1147,22 +1168,22 @@ int writeEMSConfig(ems_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ROOMID, crf->roomId);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ROOMID, crf->roomId);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->ers_url);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->ers_url);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ERSPORT, crf->ers_port);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ERSPORT, crf->ers_port);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
-        sprintf(buffer, "%s=%s\n", XH_ATTR_RESOLUTION, crf->resolution);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_RESOLUTION, crf->resolution);
         fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
@@ -1172,7 +1193,10 @@ int writeEMSConfig(ems_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(EMS_CONFIG_FILE".new",EMS_CONFIG_FILE);
+        if( rename(EMS_CONFIG_FILE".new",EMS_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 
@@ -1248,13 +1272,13 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->url);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
@@ -1264,7 +1288,10 @@ int writeLiveCacheConfig(livecache_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(LIVECACHE_CONFIG_FILE".new",LIVECACHE_CONFIG_FILE);
+        if( rename(LIVECACHE_CONFIG_FILE".new",LIVECACHE_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 
@@ -1343,22 +1370,22 @@ int writeTNConfig(tn_provision_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_HEIGHT, crf->height);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_HEIGHT, crf->height);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_WIDTH, crf->width);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_WIDTH, crf->width);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_QUALITY, crf->quality);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_QUALITY, crf->quality);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->url);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
@@ -1368,7 +1395,10 @@ int writeTNConfig(tn_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(TN_CONFIG_FILE".new",TN_CONFIG_FILE);
+        if( rename(TN_CONFIG_FILE".new",TN_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 
@@ -1452,19 +1482,19 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
         return RDKC_FAILURE;
     }
 
-    sprintf(buffer, "%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
+    snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_INTERVAL, crf->interval);
     fputs((const char *) buffer, writeFile);
 
-    sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enabled);
+    snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enabled);
     fputs((const char *) buffer, writeFile);
 
-    sprintf(buffer, "%s=%s\n", XH_FAILURE_PRECENT, crf->failurePercent);
+    snprintf(buffer, DATA_LEN, "%s=%s\n", XH_FAILURE_PRECENT, crf->failurePercent);
     fputs((const char *) buffer, writeFile);
 
-    sprintf(buffer, "%s=%s\n", XH_ATTR_URL, crf->url);
+    snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_URL, crf->url);
     fputs((const char *) buffer, writeFile);
 
-    sprintf(buffer, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
+    snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_AUTH, crf->auth_token);
     fputs((const char *) buffer, writeFile);
 
     if(Rcrf) {
@@ -1474,7 +1504,10 @@ int writeCVRStatsConfig(cvrStats_provision_info_t *crf)
     fflush(writeFile);
     fsync(fileno(writeFile));
     fclose(writeFile);
-    rename(CVRSTATS_CONFIG_FILE".new", CVRSTATS_CONFIG_FILE);
+    if( rename(CVRSTATS_CONFIG_FILE".new", CVRSTATS_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+    }
     return RDKC_SUCCESS;
 }
 
@@ -1502,28 +1535,28 @@ int readKVSConfig(kvs_provision_info_t *crf)
 	retVal = ConfigReadValues(readFile, XH_ATTR_CRED_PROVIDER, crf->credentialProvider);
         retVal = ConfigReadValues(readFile, XH_ATTR_STREAM_NAME, crf->stream_name);
         retVal = ConfigReadValues(readFile, XH_ATTR_FORCE_CSR_REQ, crf->force_CSR_req);
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_ENABLED);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_ENABLED);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CSR_enable);
 	memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_URL);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_URL);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CSR_url);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_AUTH);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CSR_CERT, XH_ATTR_AUTH);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CSR_auth);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_ENABLED);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_ENABLED);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_enable);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_URL);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_URL);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_url);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_AUTH);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_AUTH);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_auth);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_ID);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_ID);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_id);
         memset(tmp_buff, 0, sizeof(tmp_buff));
-	sprintf(tmp_buff, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA);
+	snprintf(tmp_buff, DATA_LEN, "%s_%s", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA);
         retVal = ConfigReadValues(readFile, tmp_buff, crf->cert_CA_force);
         memset(tmp_buff, 0, sizeof(tmp_buff));
 
@@ -1577,55 +1610,55 @@ int writeKVSConfig(kvs_provision_info_t *crf)
 
 	/* Update the config file here */
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ENABLED, crf->enable);
         fputs((const char *) buffer, writeFile);
 	
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s=%s\n", XH_ATTR_ROLE_ALIAS, crf->role_alias);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_ROLE_ALIAS, crf->role_alias);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s=%s\n", XH_ATTR_CRED_PROVIDER, crf->credentialProvider);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_CRED_PROVIDER, crf->credentialProvider);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s=%s\n", XH_ATTR_STREAM_NAME, crf->stream_name);
+        snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_STREAM_NAME, crf->stream_name);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-	sprintf(buffer, "%s=%s\n", XH_ATTR_FORCE_CSR_REQ, crf->force_CSR_req);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_FORCE_CSR_REQ, crf->force_CSR_req);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CSR_CERT, XH_ATTR_ENABLED, crf->cert_CSR_enable);
+        snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CSR_CERT, XH_ATTR_ENABLED, crf->cert_CSR_enable);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CSR_CERT, XH_ATTR_URL, crf->cert_CSR_url);
+        snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CSR_CERT, XH_ATTR_URL, crf->cert_CSR_url);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CSR_CERT, XH_ATTR_AUTH, crf->cert_CSR_auth);
+        snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CSR_CERT, XH_ATTR_AUTH, crf->cert_CSR_auth);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_ENABLED, crf->cert_CA_enable);
+        snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_ENABLED, crf->cert_CA_enable);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_URL, crf->cert_CA_url);
+        snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_URL, crf->cert_CA_url);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-        sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_AUTH, crf->cert_CA_auth);
+        snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_AUTH, crf->cert_CA_auth);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-	sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_ID, crf->cert_CA_id);
+	snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_ID, crf->cert_CA_id);
         fputs((const char *) buffer, writeFile);
 
 	memset(buffer, 0, sizeof(buffer));
-	sprintf(buffer, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA, crf->cert_CA_force);
+	snprintf(buffer, DATA_LEN, "%s_%s=%s\n", XH_TAG_NAME_CA_CERT, XH_ATTR_FORCE_USE_CA, crf->cert_CA_force);
         fputs((const char *) buffer, writeFile);
 
         if ( NULL != Rcrf ) {
@@ -1635,7 +1668,10 @@ int writeKVSConfig(kvs_provision_info_t *crf)
         fflush(writeFile);
         fsync(fileno(writeFile));
 	fclose(writeFile);
-        rename(KVS_CONFIG_FILE".new",KVS_CONFIG_FILE);
+        if( rename(KVS_CONFIG_FILE".new",KVS_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 
@@ -1711,10 +1747,10 @@ int writeLUXConfig(lux_threshold_info_t *crf)
 		return RDKC_FAILURE;
 	}
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_NIGHT2DAY, crf->night2day);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_NIGHT2DAY, crf->night2day);
 	fputs((const char *) buffer, writeFile);
 
-	sprintf(buffer, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
+	snprintf(buffer, DATA_LEN, "%s=%s\n", XH_ATTR_DAY2NIGHT, crf->day2night);
 	fputs((const char *) buffer, writeFile);
 
 	if(Rcrf) {
@@ -1725,7 +1761,10 @@ int writeLUXConfig(lux_threshold_info_t *crf)
         fflush(writeFile);
         fsync(file_fd);
 	fclose(writeFile);
-        rename(LUX_CONFIG_FILE".new",LUX_CONFIG_FILE);
+        if( rename(LUX_CONFIG_FILE".new",LUX_CONFIG_FILE) < 0 ) {
+            printf("%s(%d) Failed to rename %s(%d)\n", __FUNCTION__, __LINE__, strerror(errno), errno);
+            return RDKC_FAILURE;
+        }
 	return RDKC_SUCCESS;
 }
 

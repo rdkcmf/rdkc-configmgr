@@ -266,6 +266,9 @@ static int rdkc_env_add_dev_config(const char *path)
     /*accquire the mutex lock*/
     if(mutexAcquire(&g_rdkc_config_file_mutex)!=RDKC_SUCCESS) {
         perror("rdkc_env_add_dev_config : Error while acquiring mutex!!\n");
+        if(fclose(fpDev)!=0) {
+            printf("rdkc_env_add_dev_config : Error while closing the file\n");
+        }
         return RDKC_FAILURE;
     }
 
@@ -327,6 +330,9 @@ static int rdkc_env_add_dev_config(const char *path)
     /*release the lock in case of success*/
     if(mutexRelease(&g_rdkc_config_file_mutex)!=0) {
         perror("rdkc_env_add_dev_config : Error while Releasing mutex!!");
+        if(fclose(fpDev)!=0) {
+            printf("rdkc_env_add_dev_config : Error while closing the file\n");
+        }
         return RDKC_FAILURE;
     }
 
@@ -349,10 +355,10 @@ static int rdkc_env_add_usr_config(const char* dirPath)
     FILE   *fpUsr = NULL;
     DIR    *usrConfigDir = NULL;
     struct dirent *usrConfigFile = NULL;
-    char   filename[MAX_BUFFER_SIZE] = {'\0'};
-    char   fullpath[MAX_BUFFER_SIZE] = {'\0'};
-    char   param[MAX_BUFFER_SIZE] = {'\0'};
-    char   value[MAX_BUFFER_SIZE] = {'\0'};
+    char   filename[MAX_BUFFER_SIZE+1] = {'\0'};
+    char   fullpath[MAX_BUFFER_SIZE+1] = {'\0'};
+    char   param[MAX_BUFFER_SIZE+1] = {'\0'};
+    char   value[MAX_BUFFER_SIZE+1] = {'\0'};
     int    length = -1;
     char   *period = NULL;
 
@@ -366,7 +372,8 @@ static int rdkc_env_add_usr_config(const char* dirPath)
     if ((usrConfigDir = opendir (dirPath)) != NULL) {
         while ((usrConfigFile = readdir (usrConfigDir)) != NULL) {
 
-            strcpy(filename,usrConfigFile->d_name);
+            strncpy(filename,usrConfigFile->d_name,MAX_BUFFER_SIZE);
+            filename[MAX_BUFFER_SIZE] = '\0';
 
             /*Ignore the current and parent directory,as well as invalid files*/
             if('.' == filename[0] || (period=strchr(filename,DELIM_FILENAME))==NULL)
@@ -377,14 +384,16 @@ static int rdkc_env_add_usr_config(const char* dirPath)
             param[length]='\0';
 
             /*Generate the fullpath of user config file*/
-            strcpy(fullpath,dirPath);
-            strcat(fullpath,filename);
+            strncpy(fullpath,dirPath,MAX_BUFFER_SIZE);
+            fullpath[MAX_BUFFER_SIZE] = '\0';
+            strncat(fullpath,filename,strlen(filename));
 
             /*opening the user config file*/
             if((fpUsr=fopen(fullpath,"r"))==NULL) {
                 //printf("ERROR!  Could not open configuration file!\n");
                 //printf("Tried %s\n", fullpath);
 
+                closedir(usrConfigDir);
                 /*release the lock in case of failure*/
                 if(mutexRelease(&g_rdkc_config_file_mutex)!=RDKC_SUCCESS) {
                     perror("rdkc_env_add_usr_config : Error while Releasing mutex!!");
@@ -393,12 +402,12 @@ static int rdkc_env_add_usr_config(const char* dirPath)
                 return RDKC_FAILURE;
             }
 
-            fgets(value,MAX_BUFFER_SIZE+1,fpUsr);
-	    value[strlen(value)-1] = '\0';
+            fgets(value,MAX_BUFFER_SIZE,fpUsr);
+            value[MAX_BUFFER_SIZE] = '\0';
 
             /*close the user config file*/
             if(fclose(fpUsr)!=0) {
-
+                closedir(usrConfigDir);
                 /*release the lock in case of failure*/
                 if(mutexRelease(&g_rdkc_config_file_mutex)!=RDKC_SUCCESS) {
                     perror("rdkc_env_add_usr_config : Error while Releasing mutex!!");
@@ -409,7 +418,7 @@ static int rdkc_env_add_usr_config(const char* dirPath)
             }
  
             if(update_param_list(param,value)!=RDKC_SUCCESS) {
-
+                closedir(usrConfigDir);
                 /*release the lock in case of failure*/
                 if(mutexRelease(&g_rdkc_config_file_mutex)!=RDKC_SUCCESS) {
                     perror("rdkc_env_add_usr_config : Error while Releasing mutex!!");
@@ -777,6 +786,7 @@ int config_init()
         closedir(dir);
 	return RDKC_SUCCESS;
     }
+    closedir(dir);
     return RDKC_SUCCESS;
 }
 

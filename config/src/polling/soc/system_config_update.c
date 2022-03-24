@@ -31,15 +31,15 @@ int sendsignaltoprocess(const char* processname,int signalname)
         if (!(inFp = v_secure_popen("r","pgrep %s", processname))) {
 		printf("\n Unable to locate process %s\n",processname);
 		return -1;
-	}
-
-	fscanf(inFp,"%d",&pid);
-	v_secure_pclose(inFp);
-	if (pid > 0) {
-		kill(pid, signalname);
 	} else {
-		printf("\n sendsignaltoprocess : Unable to locate process %s\n",processname);
-		return -1;
+		fscanf(inFp,"%d",&pid);
+		v_secure_pclose(inFp);
+		if (pid > 0) {
+			kill(pid, signalname);
+		} else {
+			printf("\n sendsignaltoprocess : Unable to locate process %s\n",processname);
+			return -1;
+		}
 	}
 	return 0;
 }
@@ -103,7 +103,7 @@ int systemConfigWrite(char* tag, void* config, bool abrBitrateChanged)
 	}
 
 	//send signal to cvr_daemon
-	sendsignaltoprocess("cvr_daemon_kvs",SIGUSR1);
+	sendsignaltoprocess("cvr_daemon_kvs2",SIGUSR1);
 
 	return retVal;
 }
