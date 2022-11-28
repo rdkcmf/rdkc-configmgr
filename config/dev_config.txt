@@ -77,6 +77,8 @@ Reset_Alg_on_First_Frame = false
 nw_interface = eth0
 hostname = <server_ip>
 port = <port>
+Test_Harness_with_ROI = false
+Test_Harness_with_DOI = false
 
 ## IV
 od_sensitivity = 85
