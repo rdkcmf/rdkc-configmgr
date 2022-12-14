@@ -19,6 +19,9 @@
 
 # Add dependent libraries
 USE_RFCCONFIG = yes
+ifeq ($(XCAM_MODEL), SCHC2)
+IS_SYSAPPS = yes
+endif
 
 include ${RDK_PROJECT_ROOT_PATH}/utility/AppsRule.mak
 
